@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">popular-movies</string>
+    <string name="popular_title" translatable="true">Popular Movies</string>
+    <string name="top_rated_title" translatable="true">Top Rated Movies</string>
+
+    <!-- Labels -->
+    <string name="tv_label_title" translatable="true">Title</string>
+    <string name="tv_label_release_date" translatable="true">Release Date</string>
+    <string name="tv_label_rating" translatable="true">Rating</string>
+    <string name="tv_label_summary" translatable="true">Summary</string>
+
+    <!-- Default Values -->
+    <string name="default_title">Best Moive Title Ever</string>
+
+    <!-- Menu Values -->
+
+    <!-- Intent Keys -->
+    <string name="ik_movie_id" translatable="false">id</string>
+    <string name="ik_movie_poster" translatable="false">poster</string>
+    <string name="ik_movie_title" translatable="false">title</string>
+    <string name="ik_movie_backdrop" translatable="false">backdrop</string>
+    <string name="ik_movie_synopsis" translatable="false">synopsis</string>
+    <string name="ik_user_rating" translatable="false">rating</string>
+    <string name="ik_release_date" translatable="false">date</string>
+
+    <!-- Bundle Keys -->
+    <string name="bk_page_number" translatable="false">page</string>
+    <string name="bk_request_type" translatable="false">type</string>
+    <string name="bsik_popular" translatable="false">popular</string>
+    <string name="bsik_top_rated" translatable="false">top rated</string>
+    <string name="bsik_mode" translatable="false">mode</string>
+
+    <!-- Bundle Values -->
+    <string name="bv_request_type_popular" translatable="false">popular</string>
+    <string name="bv_request_type_top_rated" translatable="false">top rated</string>
+    <string name="bv_request_type_search" translatable="false">search</string>
+
+    <!-- Menu Item Values -->
+    <string name="mi_sort_popular" translatable="true">Popular</string>
+    <string name="mi_sort_top_rated" translatable="true">Top Rated</string>
+
+    <!-- Content Descriptions -->
+    <string name="description_background_image" translatable="true">Moive image as backdrop.</string>
+    <string name="description_poster_image" translatable="true">Moive poster image as a selectable tile for the user.</string>
+
+</resources>
