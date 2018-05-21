@@ -63,17 +63,16 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         // Required for inheritance from RecyclerView.Adapter due to abstract definition.
 
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        // View view = inflater.inflate(R.layout.grid_item, parent, false);
-        GridItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.grid_item, parent, false);
+        GridItemBinding binding = DataBindingUtil.inflate(inflater,
+                R.layout.grid_item,
+                parent,
+                false);
 
         return new MovieViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
-        // Required for inheritance from RecyclerView.Adapter due to abstract definition.
-        // Log.d("Onbind called", "On bind called " + Integer.toString(position) + " " + Integer.toString(this.getItemCount()));
-
         if (this.mMovies != null && position < this.mMovies.size()) {
             holder.bind(this.mMovies.get(position).getPosterPath());
         }
@@ -83,7 +82,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        // private ImageView poster = null;
 
         private final GridItemBinding mBinding;
 
@@ -92,14 +90,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             this.mBinding = binding;
             itemView.setOnClickListener(this);
         }
-
-        /*
-        MovieViewHolder(View itemView) {
-            super(itemView);
-            this.poster = (ImageView) itemView.findViewById(R.id.iv_movie_poster);
-            itemView.setOnClickListener(this);
-        }
-        */
 
         void bind(String imageURL) {
             Picasso.get().load(imageURL).error(R.drawable.image_placeholder).into(this.mBinding.ivMoviePoster);
