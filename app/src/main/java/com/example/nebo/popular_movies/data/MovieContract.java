@@ -12,7 +12,7 @@ public class MovieContract {
      * @brief class that explicitly defines the `MovieEntry` table for the `MovieContract` class.
      * @note `BaseColumns` provides the `_id` column already for entry enumeration.
      */
-    private static final class MovieEntry implements BaseColumns {
+    public static final class MovieEntry implements BaseColumns {
         // Table name
         public static final String TABLE_NAME = "Favorite Movies";
         public static final String COLUMN_MOVIE_TITLE = "Movie Title";
