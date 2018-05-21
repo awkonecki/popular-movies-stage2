@@ -1,5 +1,6 @@
 package com.example.nebo.popular_movies;
 
+import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import com.example.nebo.popular_movies.data.Movie;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+import com.example.nebo.popular_movies.databinding.GridItemBinding;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
@@ -61,9 +63,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         // Required for inheritance from RecyclerView.Adapter due to abstract definition.
 
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.grid_item, parent, false);
+        // View view = inflater.inflate(R.layout.grid_item, parent, false);
+        GridItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.grid_item, parent, false);
 
-        return new MovieViewHolder(view);
+        return new MovieViewHolder(binding);
     }
 
     @Override
@@ -80,16 +83,26 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private ImageView poster = null;
+        // private ImageView poster = null;
 
+        private final GridItemBinding mBinding;
+
+        MovieViewHolder(GridItemBinding binding) {
+            super(binding.getRoot());
+            this.mBinding = binding;
+            itemView.setOnClickListener(this);
+        }
+
+        /*
         MovieViewHolder(View itemView) {
             super(itemView);
             this.poster = (ImageView) itemView.findViewById(R.id.iv_movie_poster);
             itemView.setOnClickListener(this);
         }
+        */
 
         void bind(String imageURL) {
-            Picasso.get().load(imageURL).error(R.drawable.image_placeholder).into(this.poster);
+            Picasso.get().load(imageURL).error(R.drawable.image_placeholder).into(this.mBinding.ivMoviePoster);
         }
 
         @Override
