@@ -17,8 +17,6 @@ public class MovieContract {
         public static final String TABLE_NAME = "Favorite Movies";
         public static final String COLUMN_MOVIE_TITLE = "Movie Title";
         public static final String COLUMN_MOVIE_ID = "Movie ID";
-
-
     }
 
 }
