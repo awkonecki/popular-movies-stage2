@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.nebo.popular_movies.databinding.MovieDetailContentBinding;
 import com.example.nebo.popular_movies.databinding.MovieDetailBinding;
@@ -53,8 +51,10 @@ public class MovieDetailActivity extends AppCompatActivity {
         String title = null;
 
         if (movie != null) {
-            Picasso.get().load(movie.getPosterPath()).error(R.drawable.image_placeholder).into(detailBinding.ivMoivePosterDetail);
-            Picasso.get().load(movie.getBackdropPath()).error(R.drawable.image_placeholder).into(movieBinding.ivBackgroundDetail);
+            Picasso.get().load(movie.getPosterPath()).error(R.drawable.image_placeholder).
+                    into(detailBinding.ivMoivePosterDetail);
+            Picasso.get().load(movie.getBackdropPath()).error(R.drawable.image_placeholder).
+                    into(movieBinding.ivBackgroundDetail);
 
             if (movie.getTitle() == null) {
                 title = getString(R.string.default_title);

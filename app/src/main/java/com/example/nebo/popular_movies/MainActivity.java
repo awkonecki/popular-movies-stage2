@@ -1,7 +1,9 @@
 package com.example.nebo.popular_movies;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -18,6 +20,7 @@ import android.widget.ProgressBar;
 
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
 import com.example.nebo.popular_movies.async.MovieManagedData;
+import com.example.nebo.popular_movies.data.MovieDBHelper;
 import com.example.nebo.popular_movies.util.JsonUtils;
 
 public class MainActivity extends AppCompatActivity implements
@@ -42,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements
     private static int mMode = MainActivity.DEFAULT_MODE;
 
     private MovieManagedData mActiveData = null;
+
+    private SQLiteDatabase mDB = null;
 
     /**
      * @brief Scroll listener class that when no more vertical in the downward direction can occur
@@ -163,6 +168,12 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MovieDBHelper help = new MovieDBHelper(this);
+        this.mDB = help.getWritableDatabase();
+        // Note for getting access to the content resolver.
+        // Does not indicate which one explicitly, will likely need to define.
+        ContentResolver resolver = getContentResolver();
 
         // Save the instance of the progress bar.
         mProgressBar = findViewById(R.id.pb_main_progress_bar);
