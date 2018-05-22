@@ -143,18 +143,10 @@ public class MovieContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
-        int match = MovieContentProvider.sUriMatcher.match(uri);
-
-        switch(match) {
-            case MovieContentProvider.MOVIES:
-                break;
-            case MovieContentProvider.MOVIES_WITH_ID:
-                break;
-            default:
-                break;
-        }
-
-        return 0;
+    public int update(@NonNull Uri uri,
+                      @Nullable ContentValues values,
+                      @Nullable String selection,
+                      @Nullable String[] selectionArgs) {
+        throw new UnsupportedOperationException("The update method is currently not supported.");
     }
 }
