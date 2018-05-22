@@ -29,6 +29,11 @@
             android:parentActivityName=".MainActivity">
         </activity>
 
+        <provider
+            android:authorities="com.example.nebo.popular_movies"
+            android:name="com.example.nebo.popular_movies.data.MovieContentProvider"
+            android:exported="false"/>
+
     </application>
 
 </manifest>
