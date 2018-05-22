@@ -1,5 +1,6 @@
 package com.example.nebo.popular_movies;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -170,6 +171,9 @@ public class MainActivity extends AppCompatActivity implements
 
         MovieDBHelper help = new MovieDBHelper(this);
         this.mDB = help.getWritableDatabase();
+        // Note for getting access to the content resolver.
+        // Does not indicate which one explicitly, will likely need to define.
+        ContentResolver resolver = getContentResolver();
 
         // Save the instance of the progress bar.
         mProgressBar = findViewById(R.id.pb_main_progress_bar);

@@ -3,7 +3,9 @@
     package="com.example.nebo.popular_movies">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-
+    <uses-permission android:name="com.example.nebo.popular_movies.FAVORITE_MOVIES_READ" />
+    <uses-permission android:name="com.example.nebo.popular_movies.FAVORITE_MOVIES_WRITE" />
+    
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -26,6 +28,11 @@
             android:label="@string/default_title"
             android:parentActivityName=".MainActivity">
         </activity>
+
+        <provider
+            android:authorities="com.example.nebo.popular_movies"
+            android:name="com.example.nebo.popular_movies.data.MovieContentProvider"
+            android:exported="false"/>
 
     </application>
 
