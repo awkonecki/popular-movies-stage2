@@ -42,10 +42,32 @@ public class MovieContentProvider extends ContentProvider {
         return true;
     }
 
+    /**
+     * @note Logic follows similar to that provided by Udacity from Lesson 11.31
+     * @param uri
+     * @return
+     */
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        return null;
+        int match = sUriMatcher.match(uri);
+
+        switch (match) {
+            case MovieContentProvider.MOVIES:
+                // directory
+                return "vnd.android.cursor.dir" + "/" +
+                        MovieContract.CONTENT_AUTHORITY + "/" +
+                        MovieContract.PATH_FAVORITE_MOVIES;
+            case MovieContentProvider.MOVIES_WITH_ID:
+                // single item type
+                return "vnd.android.cursor.item" + "/" +
+                        MovieContract.CONTENT_AUTHORITY + "/" +
+                        MovieContract.PATH_FAVORITE_MOVIES + "/#";
+            default:
+                throw new UnsupportedOperationException(
+                        "Uri not supported " + uri
+                );
+        }
     }
 
     @Nullable
@@ -126,20 +148,42 @@ public class MovieContentProvider extends ContentProvider {
         return resultUri;
     }
 
+    /**
+     * @brief Deletes based on the selection and selection argument parameters provided.
+     * @param uri Indicates the Uri that is being targeted to determine operational support.
+     * @param selection String that indicates the columns of interest
+     * @param selectionArgs String that indicates the values that would be associated with the
+     *                      columns.
+     * @return
+     */
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+    public int delete(@NonNull Uri uri,
+                      @Nullable String selection,
+                      @Nullable String[] selectionArgs) {
+        SQLiteDatabase database = MovieContentProvider.mMovieDBHelper.getWritableDatabase();
         int match = MovieContentProvider.sUriMatcher.match(uri);
+        int deletedCount = 0;
 
         switch(match) {
             case MovieContentProvider.MOVIES:
-                break;
-            case MovieContentProvider.MOVIES_WITH_ID:
+                deletedCount = database.delete(MovieContract.PATH_FAVORITE_MOVIES,
+                        selection,
+                        selectionArgs);
                 break;
             default:
-                break;
+                throw new UnsupportedOperationException(
+                        "The delete method does not support the intented Uri operation."
+                );
         }
 
-        return 0;
+        // Need to notify the resolver to reflect the removal if necessary.
+        ContentResolver resolver = getContext().getContentResolver();
+
+        if (deletedCount > 0 && resolver != null) {
+            resolver.notifyChange(uri, null);
+        }
+
+        return deletedCount;
     }
 
     @Override
@@ -147,6 +191,8 @@ public class MovieContentProvider extends ContentProvider {
                       @Nullable ContentValues values,
                       @Nullable String selection,
                       @Nullable String[] selectionArgs) {
-        throw new UnsupportedOperationException("The update method is currently not supported.");
+        throw new UnsupportedOperationException(
+                "The update method is currently not supported."
+        );
     }
 }
