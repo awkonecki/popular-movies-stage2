@@ -1,6 +1,7 @@
 package com.example.nebo.popular_movies.data;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -37,7 +38,7 @@ public class MovieContentProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         // Setup the helper for the content provider to interact with.
-        this.mMovieDBHelper = new MovieDBHelper(getContext());
+        MovieContentProvider.mMovieDBHelper = new MovieDBHelper(getContext());
         return true;
     }
 
@@ -49,19 +50,40 @@ public class MovieContentProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+    public Cursor query(@NonNull Uri uri,
+                        @Nullable String[] projection,
+                        @Nullable String selection,
+                        @Nullable String[] selectionArgs,
+                        @Nullable String sortOrder) {
+        // Obtain the descriptor reference to the SQLite database.
+        final SQLiteDatabase database = MovieContentProvider.mMovieDBHelper.getReadableDatabase();
         int match = MovieContentProvider.sUriMatcher.match(uri);
+
+        Cursor cursor = null;
 
         switch(match) {
             case MovieContentProvider.MOVIES:
-                break;
-            case MovieContentProvider.MOVIES_WITH_ID:
+                // retrieve all movies
+                cursor = database.query(MovieContract.PATH_FAVORITE_MOVIES,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
                 break;
             default:
-                break;
+                throw new UnsupportedOperationException("Un-supported Uri operation.");
         }
 
-        return null;
+        // Notification by the cursor to the resolver.
+        ContentResolver resolver = getContext().getContentResolver();
+
+        if (cursor != null && resolver != null) {
+            cursor.setNotificationUri(resolver, uri);
+        }
+
+        return cursor;
     }
 
     @Nullable
@@ -95,7 +117,11 @@ public class MovieContentProvider extends ContentProvider {
         }
 
         // Need to notify the resolver.
-        getContext().getContentResolver().notifyChange(resultUri, null);
+        ContentResolver resolver = getContext().getContentResolver();
+
+        if (resolver != null) {
+            resolver.notifyChange(resultUri, null);
+        }
 
         return resultUri;
     }
