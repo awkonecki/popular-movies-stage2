@@ -20,6 +20,9 @@ public class MovieURLUtils {
     private static final String POPULAR_MOVIE_ENDPOINT = "movie/popular";
     private static final String TOP_RATED_ENDPOINT = "movie/top_rated";
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p";
+    private static final String REVIEWS_PATH = "reviews";
+    private static final String VIDEOS_PATH = "videos";
+    private static final String MOVIE_PATH = "movie";
     private static final String SIZE_W500 = "w500";
 
     // @TODO determine if image size is needed for backdrop later.
@@ -32,6 +35,62 @@ public class MovieURLUtils {
     private static final String API_KEY =
             // !!! Place key below.
             "XXX";
+
+    /**
+     * @brief Build the url to obtain reviews from moviedb.
+     * @param page Integer that represents the page of information to query form the site.
+     * @param movieId Integer that represents the unique ID of the movie that has been assigned by
+     *                moviedb.
+     * @return Returns a populated URL if no errors otherwise a null.
+     */
+    public static URL buildReviewsURL(int page, int movieId) {
+        if (page < MovieURLUtils.MIN_PAGE_NUM || page > MovieURLUtils.MAX_PAGE_NUM) {
+            page = 1;
+        }
+
+        Uri uri = Uri.parse(MovieURLUtils.THE_MOVIE_DB_BASE_URL).buildUpon().
+                appendEncodedPath(MovieURLUtils.MOVIE_PATH).
+                appendEncodedPath(Integer.toString(movieId)).
+                appendEncodedPath(MovieURLUtils.REVIEWS_PATH).
+                appendQueryParameter(MovieURLUtils.KEY_PARAM, MovieURLUtils.API_KEY).
+                appendQueryParameter(MovieURLUtils.PAGE_PARAM, Integer.toString((page))).build();
+        URL url = null;
+
+        try {
+            url = new URL(uri.toString());
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+            url = null;
+        }
+
+        return url;
+    }
+
+    /**
+     * @brief Constructs the URL to obtain the videos associated with a movie (trailers).
+     * @param moiveId Integer that represents the unique ID of the movie that has been assigned by
+     *                moviedb.
+     * @return Returns a populated URL if no errors otherwise null.
+     */
+    public static URL buildVideosURL(int moiveId) {
+        Uri uri = Uri.parse(MovieURLUtils.THE_MOVIE_DB_BASE_URL).buildUpon().
+                appendEncodedPath(MovieURLUtils.MOVIE_PATH).
+                appendEncodedPath(Integer.toString(moiveId)).
+                appendEncodedPath(MovieURLUtils.REVIEWS_PATH).
+                appendQueryParameter(MovieURLUtils.KEY_PARAM, MovieURLUtils.API_KEY).build();
+        URL url = null;
+
+        try {
+            url = new URL(uri.toString());
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+            url = null;
+        }
+
+        return url;
+    }
 
     /**
      * @brief Construct a valid URL with the popular movie endpoint specifying a desired page.
