@@ -85,6 +85,22 @@
             app:layout_constraintTop_toBottomOf="@+id/iv_moive_poster_detail"
             app:layout_constraintLeft_toLeftOf="@+id/iv_moive_poster_detail"/>
 
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_movie_detail_trailers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        </android.support.v7.widget.RecyclerView>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_movie_detail_reviews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        </android.support.v7.widget.RecyclerView>
+
         <ScrollView
             android:id="@+id/sv_description"
             android:layout_width="match_parent"
