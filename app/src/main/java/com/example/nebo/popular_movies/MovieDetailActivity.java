@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 import com.example.nebo.popular_movies.databinding.MovieDetailContentBinding;
 import com.example.nebo.popular_movies.databinding.MovieDetailBinding;
@@ -45,6 +47,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         this.populateUI(movie);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
     private void populateUI(Movie movie) {
         MovieDetailContentBinding detailBinding = DataBindingUtil.getBinding(this.getCurrentFocus());
         MovieDetailBinding movieBinding = DataBindingUtil.getBinding(this.getCurrentFocus());
@@ -66,5 +73,34 @@ public class MovieDetailActivity extends AppCompatActivity {
             detailBinding.tvMovieDetailRating.setText(Double.toString(movie.getVote()));
             detailBinding.tvLabelTitle.setText(movie.getTitle());
         }
+
+        // 1. Creation of the layout managers for the reviews and trailers.
+        LinearLayoutManager reviewLayoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL,
+                false);
+
+        LinearLayoutManager trailerLayoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL,
+                false);
+
+        // 2. Creation of the adapters for the recycler views.
+        // @TODO Provide a listener for the trailer (implicit intent).
+        AppAdapter<String> reviewAdapter = new AppAdapter<>(null,
+                R.layout.movie_review_item);
+        AppAdapter<String> trailerAdapter = new AppAdapter<>(null,
+                R.layout.movie_trailer_item);
+
+        // 3. Adding of the layout manager to the recycler views.
+        detailBinding.rvMovieDetailReviews.setLayoutManager(reviewLayoutManager);
+        detailBinding.rvMovieDetailTrailers.setLayoutManager(trailerLayoutManager);
+
+        // 4. Adding of the adapters to the recycler views.
+        detailBinding.rvMovieDetailReviews.setAdapter(reviewAdapter);
+        detailBinding.rvMovieDetailTrailers.setAdapter(trailerAdapter);
+
+        // 5. Set settings for recycler viewer.
+        detailBinding.rvMovieDetailReviews.setHasFixedSize(true);
+        detailBinding.rvMovieDetailTrailers.setHasFixedSize(true);
+
     }
 }
