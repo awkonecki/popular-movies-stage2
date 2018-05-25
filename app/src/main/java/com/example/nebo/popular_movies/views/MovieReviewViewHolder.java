@@ -16,7 +16,12 @@ public class MovieReviewViewHolder extends MovieViewHolder {
     }
 
     @Override
-    public void bind() {
+    public void bind(String resource) {
+
+    }
+
+    @Override
+    public void onBindDefault() {
 
     }
 }

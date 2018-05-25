@@ -44,7 +44,12 @@ public class AppAdapter <D> extends RecyclerView.Adapter<MovieViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
-
+        if (position >= 0 && this.mAdapterData != null && !this.mAdapterData.isEmpty()) {
+            holder.bind(this.mAdapterData.get(position).toString());
+        }
+        else {
+            holder.onBindDefault();
+        }
     }
 
     @Override

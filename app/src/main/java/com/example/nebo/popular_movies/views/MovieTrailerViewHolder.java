@@ -16,7 +16,12 @@ public class MovieTrailerViewHolder extends MovieViewHolder {
     }
 
     @Override
-    public void bind() {
+    public void bind(String resource) {
         // this.mBinding.vvMovieTrailerItem.set
+    }
+
+    @Override
+    public void onBindDefault() {
+
     }
 }
