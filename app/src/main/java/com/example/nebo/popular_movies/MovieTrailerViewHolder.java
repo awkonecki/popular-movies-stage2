@@ -1,6 +1,7 @@
 package com.example.nebo.popular_movies;
 
 import android.databinding.ViewDataBinding;
+import android.support.annotation.NonNull;
 import android.view.View;
 import com.example.nebo.popular_movies.databinding.MovieTrailerItemBinding;
 
@@ -8,23 +9,14 @@ public class MovieTrailerViewHolder extends MovieViewHolder {
 
     private final MovieTrailerItemBinding mBinding;
 
-    public MovieTrailerViewHolder(MovieTrailerItemBinding binding) {
-        super(binding.getRoot());
+    public MovieTrailerViewHolder(@NonNull MovieTrailerItemBinding binding,
+                                  @NonNull AppAdapter.AppAdapterOnClickListener listener) {
+        super(binding.getRoot(), listener);
         this.mBinding = binding;
     }
 
     @Override
-    public void onClick(View v) {
-
-    }
-
-    @Override
-    public int getLayoutID() {
-        return 0;
-    }
-
-    @Override
-    public ViewDataBinding getBinding() {
-        return null;
+    public void bind() {
+        // this.mBinding.vvMovieTrailerItem.set
     }
 }
