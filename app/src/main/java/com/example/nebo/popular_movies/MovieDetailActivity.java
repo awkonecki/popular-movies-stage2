@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.example.nebo.popular_movies.databinding.MovieDetailContentBinding;
 import com.example.nebo.popular_movies.databinding.MovieDetailBinding;
@@ -15,6 +16,9 @@ import com.example.nebo.popular_movies.data.Movie;
 import com.squareup.picasso.Picasso;
 
 public class MovieDetailActivity extends AppCompatActivity {
+
+    private MovieDetailContentBinding mDetailBinding = null;
+    private MovieDetailBinding mMovieBinding = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +54,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        Log.d("MovieDetailActivity", "onSaveInstaceState called");
     }
 
     private void populateUI(Movie movie) {

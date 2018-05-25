@@ -22,9 +22,9 @@ public class MovieContract {
                 appendPath(MovieContract.PATH_FAVORITE_MOVIES).build();
 
         // Table name
-        public static final String TABLE_NAME = "Favorite Movies";
-        public static final String COLUMN_MOVIE_TITLE = "Movie Title";
-        public static final String COLUMN_MOVIE_ID = "Movie ID";
+        public static final String TABLE_NAME = "Favorite_Movies";
+        public static final String COLUMN_MOVIE_TITLE = "Movie_Title";
+        public static final String COLUMN_MOVIE_ID = "Movie_ID";
     }
 
 }
