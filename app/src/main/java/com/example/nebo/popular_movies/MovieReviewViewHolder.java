@@ -1,14 +1,14 @@
 package com.example.nebo.popular_movies;
 
 import android.view.View;
-import com.example.nebo.popular_movies.databinding.GridItemBinding;
+import com.example.nebo.popular_movies.databinding.MovieReviewItemBinding;
 
-public class MoviePosterViewHolder extends MovieViewHolder {
+public class MovieReviewViewHolder extends MovieViewHolder {
 
-    private static final int mLayoutID = R.layout.grid_item;
-    private final GridItemBinding mBinding;
+    private static final int mLayoutID = R.layout.movie_review_item;
+    private final MovieReviewItemBinding mBinding;
 
-    public MoviePosterViewHolder(GridItemBinding binding) {
+    public MovieReviewViewHolder(MovieReviewItemBinding binding) {
         super(binding.getRoot());
         this.mBinding = binding;
     }
@@ -20,7 +20,7 @@ public class MoviePosterViewHolder extends MovieViewHolder {
 
     @Override
     public int getLayoutID() {
-        return MoviePosterViewHolder.mLayoutID;
+        return MovieReviewViewHolder.mLayoutID;
     }
 
     @Override

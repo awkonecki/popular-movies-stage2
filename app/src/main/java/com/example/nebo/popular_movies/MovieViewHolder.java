@@ -7,11 +7,12 @@ import com.example.nebo.popular_movies.databinding.GridItemBinding;
 import com.example.nebo.popular_movies.databinding.MovieReviewItemBinding;
 import com.example.nebo.popular_movies.databinding.MovieTrailerItemBinding;
 
-abstract public class MovieViewHolder <B> extends RecyclerView.ViewHolder implements View.OnClickListener {
+abstract public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     public MovieViewHolder(View itemView) {
         super(itemView);
     }
 
+    /*
     public MovieViewHolder(GridItemBinding binding) {
         super(binding.getRoot());
     }
@@ -23,10 +24,14 @@ abstract public class MovieViewHolder <B> extends RecyclerView.ViewHolder implem
     public MovieViewHolder(MovieTrailerItemBinding binding) {
         super(binding.getRoot());
     }
+    */
+
+    public static int getLayoutID() {
+
+    }
 
     @Override
     abstract public void onClick(View v);
-
-    abstract public int getLayoutID();
+    // abstract public int getLayoutID();
     abstract public android.databinding.ViewDataBinding getBinding();
 }

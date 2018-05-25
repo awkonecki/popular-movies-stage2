@@ -7,16 +7,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.nebo.popular_movies.databinding.GridItemBinding;
+import com.example.nebo.popular_movies.databinding.MovieReviewItemBinding;
+
 import java.util.List;
 
-public class AppAdapter <D, B> extends RecyclerView.Adapter<B extends MovieViewHolder<B>> {
+// new AppAdapter<Movie, MoviePosterViewHolder>
+
+public class AppAdapter <D, VH extends MovieViewHolder> extends RecyclerView.Adapter<MovieViewHolder> {
 
     private final AppAdapter.AppAdapterOnClickListener mListener;
+    private final Class<VH> mViewHolder;
     private List<D> mAdapterData = null;
     private int mLayout;
 
-    public AppAdapter(AppAdapter.AppAdapterOnClickListener listener) {
+    public AppAdapter(AppAdapter.AppAdapterOnClickListener listener, Class<VH> viewHolder) {
         this.mListener = listener;
+        this.mViewHolder = viewHolder;
     }
 
     public interface AppAdapterOnClickListener {
@@ -30,20 +37,25 @@ public class AppAdapter <D, B> extends RecyclerView.Adapter<B extends MovieViewH
 
     @NonNull
     @Override
-    public B onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        //B binding = DataBindingUtil.inflate(layoutInflater, 0, parent, false);
-        //return new B(binding);
-        return null;
+        return ViewHolderFactory.createView(this.mViewHolder,
+                DataBindingUtil.inflate(layoutInflater,
+                    this.mViewHolder.getLayoutID(),
+                    parent,
+                    false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull B holder, int position) {
+    public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
 
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        if (this.mAdapterData == null) {
+            return 0;
+        }
+        return this.mAdapterData.size();
     }
 }
