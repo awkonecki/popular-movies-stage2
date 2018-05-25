@@ -1,8 +1,8 @@
-package com.example.nebo.popular_movies;
+package com.example.nebo.popular_movies.views;
 
-import android.databinding.ViewDataBinding;
 import android.support.annotation.NonNull;
-import android.view.View;
+
+import com.example.nebo.popular_movies.AppAdapter;
 import com.example.nebo.popular_movies.databinding.MovieReviewItemBinding;
 
 public class MovieReviewViewHolder extends MovieViewHolder {

@@ -6,6 +6,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.example.nebo.popular_movies.views.MovieViewHolder;
+import com.example.nebo.popular_movies.views.ViewHolderFactory;
+
 import java.util.List;
 
 public class AppAdapter <D> extends RecyclerView.Adapter<MovieViewHolder> {

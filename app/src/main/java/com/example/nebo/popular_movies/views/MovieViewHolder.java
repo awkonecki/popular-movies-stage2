@@ -1,8 +1,9 @@
-package com.example.nebo.popular_movies;
+package com.example.nebo.popular_movies.views;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import com.example.nebo.popular_movies.AppAdapter;
 import com.example.nebo.popular_movies.databinding.GridItemBinding;
 import com.example.nebo.popular_movies.databinding.MovieReviewItemBinding;
 import com.example.nebo.popular_movies.databinding.MovieTrailerItemBinding;
