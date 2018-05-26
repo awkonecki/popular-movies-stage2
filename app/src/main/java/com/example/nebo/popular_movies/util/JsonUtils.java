@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.nebo.popular_movies.data.Movie;
+import com.example.nebo.popular_movies.data.Review;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -20,6 +21,10 @@ public class JsonUtils {
     private static final String MOVIE_BACKDROP_PATH_KEY = "backdrop_path";
     private static final String MOVIE_OVERVIEW_KEY = "overview";
     private static final String MOVIE_DATE_KEY = "release_date";
+
+    public static List<Review> parseJsonResponse(@NonNull String response) {
+        return null;
+    }
 
     /**
      * @brief Parse the JSON response for a list of movies.
