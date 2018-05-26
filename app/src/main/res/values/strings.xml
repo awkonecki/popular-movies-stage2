@@ -29,11 +29,14 @@
     <string name="bsik_popular" translatable="false">popular</string>
     <string name="bsik_top_rated" translatable="false">top rated</string>
     <string name="bsik_mode" translatable="false">mode</string>
+    <string name="bk_movie_id" translatable="false">movie-id</string>
 
     <!-- Bundle Values -->
     <string name="bv_request_type_popular" translatable="false">popular</string>
     <string name="bv_request_type_top_rated" translatable="false">top rated</string>
     <string name="bv_request_type_search" translatable="false">search</string>
+    <string name="bv_request_type_trailers" translatable="false">trailers</string>
+    <string name="bv_request_type_reviews" translatable="false">reviews</string>
 
     <!-- Menu Item Values -->
     <string name="mi_sort_popular" translatable="true">Popular</string>
