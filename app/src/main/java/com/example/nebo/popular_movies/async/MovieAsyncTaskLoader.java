@@ -34,6 +34,7 @@ public class MovieAsyncTaskLoader extends AsyncTaskLoader<String> {
         String response = null;
         String type;
         int page = MovieURLUtils.DEFAULT_PAGE_NUM;
+        int id = 0;
         Resources resources = getContext().getResources();
 
         // Need to determine the type of work the task is expected to perform.
@@ -49,6 +50,7 @@ public class MovieAsyncTaskLoader extends AsyncTaskLoader<String> {
                     MovieURLUtils.DEFAULT_PAGE_NUM);
             type = this.mArgs.getString(resources.getString(R.string.bk_request_type),
                     resources.getString(R.string.bv_request_type_popular));
+            id = this.mArgs.getInt("movie-id", 0);
         }
         else {
             type = resources.getString(R.string.bv_request_type_popular);
@@ -61,6 +63,12 @@ public class MovieAsyncTaskLoader extends AsyncTaskLoader<String> {
         }
         else if (type.equals(resources.getString(R.string.bv_request_type_top_rated))) {
             url = MovieURLUtils.buildTopRatedURL(page);
+        }
+        else if (type.equals("reviews")) {
+            url = MovieURLUtils.buildReviewsURL(page, id);
+        }
+        else if (type.equals("trailers")) {
+            url = MovieURLUtils.buildVideosURL(id);
         }
         else if (type.equals(resources.getString(R.string.bv_request_type_search))) {
             Log.d("loadInBackground", "Search not supported yet.");

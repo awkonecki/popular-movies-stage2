@@ -1,25 +1,23 @@
 package com.example.nebo.popular_movies;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 
 import com.example.nebo.popular_movies.databinding.MovieDetailContentBinding;
-import com.example.nebo.popular_movies.databinding.MovieDetailBinding;
 import com.example.nebo.popular_movies.data.Movie;
 import com.squareup.picasso.Picasso;
 
-public class MovieDetailActivity extends AppCompatActivity {
+public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
     private MovieDetailContentBinding mDetailBinding = null;
-    private MovieDetailBinding mMovieBinding = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,8 +25,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         setContentView(R.layout.movie_detail);
         this.mDetailBinding = DataBindingUtil.setContentView(this,
                 R.layout.movie_detail_content);
-        // this.mMovieBinding = DataBindingUtil.setContentView(this,
-        //        R.layout.movie_detail);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -54,7 +50,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
 
         this.populateUI(movie);
-        Log.d("Movie Contents", movie.toString());
     }
 
     @Override
@@ -111,5 +106,20 @@ public class MovieDetailActivity extends AppCompatActivity {
         // 5. Set settings for recycler viewer.
         this.mDetailBinding.rvMovieDetailReviews.setHasFixedSize(true);
         this.mDetailBinding.rvMovieDetailTrailers.setHasFixedSize(true);
+    }
+
+    @Override
+    public Loader<String> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<String> loader, String data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<String> loader) {
+
     }
 }
