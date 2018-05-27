@@ -1,5 +1,6 @@
 package com.example.nebo.popular_movies.views;
 
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.example.nebo.popular_movies.AppAdapter;
@@ -10,21 +11,6 @@ import com.example.nebo.popular_movies.databinding.MovieTrailerItemBinding;
 
 public class ViewHolderFactory {
     private static ViewHolderFactory mFactoryInstance = null;
-    private final AppAdapter.AppAdapterOnClickListener mListener;
-
-    public MovieViewHolder(View itemView, AppAdapter.AppAdapterOnClickListener listener) {
-        super(itemView);
-        itemView.setOnClickListener(this);
-        this.mListener = listener;
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (this.mListener != null) {
-            this.mListener.onClick(getAdapterPosition());
-        }
-    }
-
 
     private ViewHolderFactory() {
 
@@ -38,20 +24,21 @@ public class ViewHolderFactory {
         return ViewHolderFactory.mFactoryInstance;
     }
 
-    public static MovieViewHolder createView(int layout,
-                                             android.databinding.ViewDataBinding binding,
-                                             AppAdapter.AppAdapterOnClickListener listener) {
-        MovieViewHolder movieViewHolder = null;
+    public static RecyclerView.ViewHolder createView(int layout,
+                                          android.databinding.ViewDataBinding binding,
+                                          AppAdapter.AppAdapterOnClickListener listener) {
+        RecyclerView.ViewHolder viewHolder = null;
         switch(layout) {
             case R.layout.grid_item:
-                movieViewHolder = new MoviePosterViewHolder((GridItemBinding) binding,
+                viewHolder = new MoviePosterViewHolder((GridItemBinding) binding,
                         listener);
                 break;
             case R.layout.movie_review_item:
-                movieViewHolder = new MovieReviewViewHolder((MovieReviewItemBinding) binding,
+                viewHolder = new MovieReviewViewHolder((MovieReviewItemBinding) binding,
                         listener);
+                break;
             case R.layout.movie_trailer_item:
-                movieViewHolder = new MovieTrailerViewHolder((MovieTrailerItemBinding) binding,
+                viewHolder = new MovieTrailerViewHolder((MovieTrailerItemBinding) binding,
                         listener);
                 break;
             default:
@@ -60,6 +47,6 @@ public class ViewHolderFactory {
 
 
 
-        return movieViewHolder;
+        return viewHolder;
     }
 }

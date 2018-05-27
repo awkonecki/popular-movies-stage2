@@ -43,30 +43,30 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                 LinearLayoutManager.HORIZONTAL,
                 false);
 
-        LinearLayoutManager trailerLayoutManager = new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL,
-                false);
+        // LinearLayoutManager trailerLayoutManager = new LinearLayoutManager(this,
+        //        LinearLayoutManager.HORIZONTAL,
+        //        false);
 
         // 2. Creation of the adapters for the recycler views.
         // @TODO Provide a listener for the trailer (implicit intent).
         AppAdapter<Review, MovieReviewViewHolder<Review>> reviewAdapter =
                 new AppAdapter<Review, MovieReviewViewHolder<Review>>(null,
                 R.layout.movie_review_item);
-        AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> trailerAdapter =
-                new AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>(null,
-                R.layout.movie_trailer_item);
+        // AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> trailerAdapter =
+        //        new AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>(null,
+        //        R.layout.movie_trailer_item);
 
         // 3. Adding of the layout manager to the recycler views.
         this.mDetailBinding.rvMovieDetailReviews.setLayoutManager(reviewLayoutManager);
-        this.mDetailBinding.rvMovieDetailTrailers.setLayoutManager(trailerLayoutManager);
+        // this.mDetailBinding.rvMovieDetailTrailers.setLayoutManager(trailerLayoutManager);
 
         // 4. Adding of the adapters to the recycler views.
         this.mDetailBinding.rvMovieDetailReviews.setAdapter(reviewAdapter);
-        this.mDetailBinding.rvMovieDetailTrailers.setAdapter(trailerAdapter);
+        // this.mDetailBinding.rvMovieDetailTrailers.setAdapter(trailerAdapter);
 
         // 5. Set settings for recycler viewer.
         this.mDetailBinding.rvMovieDetailReviews.setHasFixedSize(true);
-        this.mDetailBinding.rvMovieDetailTrailers.setHasFixedSize(true);
+        // this.mDetailBinding.rvMovieDetailTrailers.setHasFixedSize(true);
 
         Intent intent = getIntent();
         if (intent == null) {
