@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements
         // Only process if response contains content.
         if (response != null && !response.isEmpty()) {
             // Add the list of movies to the overall list.
-            this.mActiveData.addMovies(JsonUtils.parseJsonResponse(response));
+            this.mActiveData.addMovies(JsonUtils.parseJsonResponseForMovies(response));
 
             // Inform the movie adapter of the change.
             this.mMovieAdapter.setMovieData(this.mActiveData);

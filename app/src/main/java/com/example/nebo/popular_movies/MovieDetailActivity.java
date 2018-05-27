@@ -13,8 +13,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
+import com.example.nebo.popular_movies.data.Review;
+import com.example.nebo.popular_movies.data.Trailer;
 import com.example.nebo.popular_movies.databinding.MovieDetailContentBinding;
 import com.example.nebo.popular_movies.data.Movie;
+import com.example.nebo.popular_movies.util.JsonUtils;
+import com.example.nebo.popular_movies.views.MovieReviewViewHolder;
+import com.example.nebo.popular_movies.views.MovieTrailerViewHolder;
 import com.squareup.picasso.Picasso;
 
 public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
@@ -44,9 +49,11 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
 
         // 2. Creation of the adapters for the recycler views.
         // @TODO Provide a listener for the trailer (implicit intent).
-        AppAdapter<String> reviewAdapter = new AppAdapter<>(null,
+        AppAdapter<Review, MovieReviewViewHolder<Review>> reviewAdapter =
+                new AppAdapter<Review, MovieReviewViewHolder<Review>>(null,
                 R.layout.movie_review_item);
-        AppAdapter<String> trailerAdapter = new AppAdapter<>(null,
+        AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> trailerAdapter =
+                new AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>(null,
                 R.layout.movie_trailer_item);
 
         // 3. Adding of the layout manager to the recycler views.
@@ -140,9 +147,14 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
 
     @Override
     public void onLoadFinished(@NonNull android.support.v4.content.Loader<String> loader, String data) {
-        Log.d("onLoadFinished", data);
-        AppAdapter<String> reviewAdapter = (AppAdapter<String>) this.mDetailBinding.rvMovieDetailReviews.getAdapter();
-        // reviewAdapter.setAdapterData();
+        if (data != null) {
+            // @TODO fix the case one day likely with an interface for the binding instead of super
+            // class.
+            AppAdapter<Review, MovieReviewViewHolder<Review>> reviewAdapter =
+                    (AppAdapter<Review, MovieReviewViewHolder<Review>>)
+                            this.mDetailBinding.rvMovieDetailReviews.getAdapter();
+            reviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
+        }
     }
 
     @Override

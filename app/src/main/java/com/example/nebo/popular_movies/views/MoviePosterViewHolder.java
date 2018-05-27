@@ -6,7 +6,7 @@ import android.view.View;
 import com.example.nebo.popular_movies.AppAdapter;
 import com.example.nebo.popular_movies.databinding.GridItemBinding;
 
-public class MoviePosterViewHolder extends MovieViewHolder {
+public class MoviePosterViewHolder <D> extends MovieViewHolder <D> {
     private final GridItemBinding mBinding;
 
     public MoviePosterViewHolder(@NonNull GridItemBinding binding,
@@ -21,7 +21,7 @@ public class MoviePosterViewHolder extends MovieViewHolder {
     }
 
     @Override
-    public void bind(String resource) {
+    public void bind(D resource) {
 
     }
 

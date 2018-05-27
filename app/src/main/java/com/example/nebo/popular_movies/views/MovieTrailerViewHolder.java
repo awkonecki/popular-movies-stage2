@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import com.example.nebo.popular_movies.AppAdapter;
 import com.example.nebo.popular_movies.databinding.MovieTrailerItemBinding;
 
-public class MovieTrailerViewHolder extends MovieViewHolder {
+public class MovieTrailerViewHolder <D> extends MovieViewHolder<D> {
 
     private final MovieTrailerItemBinding mBinding;
 
@@ -16,7 +16,7 @@ public class MovieTrailerViewHolder extends MovieViewHolder {
     }
 
     @Override
-    public void bind(String resource) {
+    public void bind(D resource) {
         // this.mBinding.vvMovieTrailerItem.set
     }
 

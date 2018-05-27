@@ -2,10 +2,14 @@ package com.example.nebo.popular_movies.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+
+import com.example.nebo.popular_movies.util.JsonUtils;
+
+import java.util.List;
 
 public class Review implements Parcelable {
 
-    private static final int REVIEW_ID_CONTENT_VERSION = 1;
     private String mAuthor;
     private String mContent;
     private String mId;
@@ -16,6 +20,10 @@ public class Review implements Parcelable {
         this.mContent = content;
         this.mId = id;
         this.mUrl = url;
+    }
+
+    public String getContent() {
+        return this.mContent;
     }
 
     private Review(Parcel src) {
