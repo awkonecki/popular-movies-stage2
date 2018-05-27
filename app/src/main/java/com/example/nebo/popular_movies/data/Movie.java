@@ -2,6 +2,17 @@ package com.example.nebo.popular_movies.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.util.Log;
+
+import com.example.nebo.popular_movies.util.JsonUtils;
+import com.example.nebo.popular_movies.util.MovieURLUtils;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.List;
+import java.util.ArrayList;
 
 public class Movie implements Parcelable {
     // Keep count of the total number of movie objects created.
@@ -103,6 +114,10 @@ public class Movie implements Parcelable {
 
     public double getVote() {
         return this.mVoteAverage;
+    }
+
+    public int getId () {
+        return this.mID;
     }
 
     @Override

@@ -2,8 +2,8 @@ package com.example.nebo.popular_movies;
 
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -20,8 +20,11 @@ import android.widget.ProgressBar;
 
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
 import com.example.nebo.popular_movies.async.MovieManagedData;
+import com.example.nebo.popular_movies.data.Movie;
 import com.example.nebo.popular_movies.data.MovieDBHelper;
 import com.example.nebo.popular_movies.util.JsonUtils;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<String>,
@@ -113,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements
             MainActivity.mLoading = true;
             // Loader Manager for async tasks
             LoaderManager loaderManager = getSupportLoaderManager();
-            Loader<Cursor> movieLoader = loaderManager.getLoader(MainActivity.FETCH_DATA_ID);
+            Loader<String> movieLoader = loaderManager.getLoader(MainActivity.FETCH_DATA_ID);
 
             // Set the visibility due to fetch action being started.
             this.onFetch();
@@ -272,12 +275,16 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void OnClick(int position) {
         Intent intent = new Intent(this, MovieDetailActivity.class);
+        intent.putExtra("movie", this.mActiveData.getMovies().get(position));
+
+        /*
         intent.putExtra(getString(R.string.ik_movie_poster), this.mActiveData.getMovies().get(position).getPosterPath());
         intent.putExtra(getString(R.string.ik_movie_title), this.mActiveData.getMovies().get(position).getTitle());
         intent.putExtra(getString(R.string.ik_movie_backdrop), this.mActiveData.getMovies().get(position).getBackdropPath());
         intent.putExtra(getString(R.string.ik_movie_synopsis), this.mActiveData.getMovies().get(position).getOverview());
         intent.putExtra(getString(R.string.ik_user_rating), this.mActiveData.getMovies().get(position).getVote());
         intent.putExtra(getString(R.string.ik_release_date), this.mActiveData.getMovies().get(position).getReleaseDate());
+        */
 
         startActivity(intent);
     }
@@ -328,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements
         // Only process if response contains content.
         if (response != null && !response.isEmpty()) {
             // Add the list of movies to the overall list.
-            this.mActiveData.addMovies(JsonUtils.parseJsonResponse(response));
+            this.mActiveData.addMovies(JsonUtils.parseJsonResponseForMovies(response));
 
             // Inform the movie adapter of the change.
             this.mMovieAdapter.setMovieData(this.mActiveData);

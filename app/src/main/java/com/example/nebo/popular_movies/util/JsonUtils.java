@@ -4,14 +4,21 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.nebo.popular_movies.data.Movie;
+import com.example.nebo.popular_movies.data.Review;
+import com.example.nebo.popular_movies.data.Trailer;
 
-import java.util.List;
-import java.util.ArrayList;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 public class JsonUtils {
-    private static final String MOVIE_LIST_RESPONSE_KEY = "results";
+    private static final String LIST_RESPONSE_KEY = "results";
+    private static final String PAGE_KEY = "page";
+
     private static final String MOVIE_ID_KEY = "id";
     private static final String MOVIE_VOTE_KEY = "vote_average";
     private static final String MOVIE_TITLE_KEY = "title";
@@ -21,13 +28,68 @@ public class JsonUtils {
     private static final String MOVIE_OVERVIEW_KEY = "overview";
     private static final String MOVIE_DATE_KEY = "release_date";
 
+    private static final String REVIEW_ID_KEY = "id";
+    private static final String REVIEW_AUTHOR_KEY = "author";
+    private static final String REVIEW_CONTENT_KEY = "content";
+    private static final String REVIEW_URL_KEY = "url";
+
+    public static List<Trailer> parseJsonResponseForTrailers(@NonNull String response) {
+        return null;
+    }
+
+    public static List<Review> parseJsonResponseForReviews(@NonNull String response) {
+        List<Review> reviews = new ArrayList<Review>();
+        JSONObject jsonResponse = null;
+        JSONArray jsonArrayOfReivews = null;
+
+        // Prevent an actual run-time exception failure.
+        if (response == null) {
+            return reviews;
+        }
+
+        try {
+            jsonResponse = new JSONObject(response);
+            jsonArrayOfReivews = jsonResponse.getJSONArray(JsonUtils.LIST_RESPONSE_KEY);
+
+            for (int index = 0; index < jsonArrayOfReivews.length(); index++) {
+                Review review = JsonUtils.parseJsonReview(jsonArrayOfReivews.getJSONObject(index));
+
+                if (review != null) {
+                    reviews.add(review);
+                }
+            }
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return reviews;
+    }
+
+    private static Review parseJsonReview(@NonNull JSONObject jsonReview) {
+        String author, content, id, url;
+
+        try {
+            author = jsonReview.getString(JsonUtils.REVIEW_AUTHOR_KEY);
+            content = jsonReview.getString(JsonUtils.REVIEW_CONTENT_KEY);
+            id = jsonReview.getString(JsonUtils.REVIEW_ID_KEY);
+            url = jsonReview.getString(JsonUtils.REVIEW_URL_KEY);
+
+            return new Review(author, content, id, url);
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     /**
-     * @brief Parse the JSON response for a list of movies.
-     * @param response String representing the JSON response supporting a popular and top rated end
-     *                 point API.
-     * @return List of movies.
+     * @brief Parse the JSON response for a list of supported POJOs.
+     * @param response String representing the JSON response.
+     * @return List of defined T based on the implementing class.
      */
-    public static List<Movie> parseJsonResponse(@NonNull String response) {
+    public static List<Movie> parseJsonResponseForMovies(@NonNull String response) {
         List<Movie> movies = new ArrayList<Movie>();
         JSONObject jsonResponse = null;
         JSONArray jsonArrayOfMovies = null;
@@ -38,7 +100,7 @@ public class JsonUtils {
 
         try {
             jsonResponse = new JSONObject(response);
-            jsonArrayOfMovies = jsonResponse.getJSONArray(JsonUtils.MOVIE_LIST_RESPONSE_KEY);
+            jsonArrayOfMovies = jsonResponse.getJSONArray(JsonUtils.LIST_RESPONSE_KEY);
 
             for (int index = 0; index < jsonArrayOfMovies.length(); index++) {
                 Movie movie = JsonUtils.parseJsonMovie(jsonArrayOfMovies.getJSONObject(index));
