@@ -77,7 +77,7 @@ public class MovieURLUtils {
         Uri uri = Uri.parse(MovieURLUtils.THE_MOVIE_DB_BASE_URL).buildUpon().
                 appendEncodedPath(MovieURLUtils.MOVIE_PATH).
                 appendEncodedPath(Integer.toString(moiveId)).
-                appendEncodedPath(MovieURLUtils.REVIEWS_PATH).
+                appendEncodedPath(MovieURLUtils.VIDEOS_PATH).
                 appendQueryParameter(MovieURLUtils.KEY_PARAM, MovieURLUtils.API_KEY).build();
         URL url = null;
 

@@ -15,6 +15,7 @@ import android.util.Log;
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
 import com.example.nebo.popular_movies.data.Review;
 import com.example.nebo.popular_movies.data.Trailer;
+import com.example.nebo.popular_movies.databinding.MovieDetailBinding;
 import com.example.nebo.popular_movies.databinding.MovieDetailContentBinding;
 import com.example.nebo.popular_movies.data.Movie;
 import com.example.nebo.popular_movies.util.JsonUtils;
@@ -24,14 +25,15 @@ import com.squareup.picasso.Picasso;
 
 public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
-    private MovieDetailContentBinding mDetailBinding = null;
+    private MovieDetailBinding mDetailBinding = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.movie_detail);
-        this.mDetailBinding = DataBindingUtil.setContentView(this,
-                R.layout.movie_detail_content);
+        // setContentView(R.layout.movie_detail);
+        // this.mDetailBinding = DataBindingUtil.setContentView(this,
+        //        R.layout.movie_detail_content);
+        mDetailBinding = DataBindingUtil.setContentView(this, R.layout.movie_detail);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -43,30 +45,30 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                 LinearLayoutManager.HORIZONTAL,
                 false);
 
-        // LinearLayoutManager trailerLayoutManager = new LinearLayoutManager(this,
-        //        LinearLayoutManager.HORIZONTAL,
-        //        false);
+        LinearLayoutManager trailerLayoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL,
+                false);
 
         // 2. Creation of the adapters for the recycler views.
         // @TODO Provide a listener for the trailer (implicit intent).
         AppAdapter<Review, MovieReviewViewHolder<Review>> reviewAdapter =
                 new AppAdapter<Review, MovieReviewViewHolder<Review>>(null,
                 R.layout.movie_review_item);
-        // AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> trailerAdapter =
-        //        new AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>(null,
-        //        R.layout.movie_trailer_item);
+        AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> trailerAdapter =
+                new AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>(null,
+                R.layout.movie_trailer_item);
 
         // 3. Adding of the layout manager to the recycler views.
-        this.mDetailBinding.rvMovieDetailReviews.setLayoutManager(reviewLayoutManager);
-        // this.mDetailBinding.rvMovieDetailTrailers.setLayoutManager(trailerLayoutManager);
+        this.mDetailBinding.movieDetail.rvMovieDetailReviews.setLayoutManager(reviewLayoutManager);
+        this.mDetailBinding.movieDetail.rvMovieDetailTrailers.setLayoutManager(trailerLayoutManager);
 
         // 4. Adding of the adapters to the recycler views.
-        this.mDetailBinding.rvMovieDetailReviews.setAdapter(reviewAdapter);
-        // this.mDetailBinding.rvMovieDetailTrailers.setAdapter(trailerAdapter);
+        this.mDetailBinding.movieDetail.rvMovieDetailReviews.setAdapter(reviewAdapter);
+        this.mDetailBinding.movieDetail.rvMovieDetailTrailers.setAdapter(trailerAdapter);
 
         // 5. Set settings for recycler viewer.
-        this.mDetailBinding.rvMovieDetailReviews.setHasFixedSize(true);
-        // this.mDetailBinding.rvMovieDetailTrailers.setHasFixedSize(true);
+        this.mDetailBinding.movieDetail.rvMovieDetailReviews.setHasFixedSize(true);
+        this.mDetailBinding.movieDetail.rvMovieDetailTrailers.setHasFixedSize(true);
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -117,15 +119,15 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
 
         if (movie != null) {
             Picasso.get().load(movie.getPosterPath()).error(R.drawable.image_placeholder).
-                    into(this.mDetailBinding.ivMoivePosterDetail);
+                    into(this.mDetailBinding.movieDetail.ivMoivePosterDetail);
             // Picasso.get().load(movie.getBackdropPath()).error(R.drawable.image_placeholder).
             //        into(this.mMovieBinding.ivBackgroundDetail);
 
             this.setTitle(movie.getTitle());
-            this.mDetailBinding.tvMovieDescription.setText(movie.getOverview());
-            this.mDetailBinding.tvMovieDetailReleaseDate.setText(movie.getReleaseDate());
-            this.mDetailBinding.tvMovieDetailRating.setText(Double.toString(movie.getVote()));
-            this.mDetailBinding.tvMovieDetailTitle.setText(movie.getTitle());
+            this.mDetailBinding.movieDetail.tvMovieDescription.setText(movie.getOverview());
+            this.mDetailBinding.movieDetail.tvMovieDetailReleaseDate.setText(movie.getReleaseDate());
+            this.mDetailBinding.movieDetail.tvMovieDetailRating.setText(Double.toString(movie.getVote()));
+            this.mDetailBinding.movieDetail.tvMovieDetailTitle.setText(movie.getTitle());
         }
     }
 
@@ -152,7 +154,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
             // class.
             AppAdapter<Review, MovieReviewViewHolder<Review>> reviewAdapter =
                     (AppAdapter<Review, MovieReviewViewHolder<Review>>)
-                            this.mDetailBinding.rvMovieDetailReviews.getAdapter();
+                            this.mDetailBinding.movieDetail.rvMovieDetailReviews.getAdapter();
             reviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
         }
     }
