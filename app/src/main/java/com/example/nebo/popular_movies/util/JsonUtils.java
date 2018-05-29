@@ -47,6 +47,8 @@ public class JsonUtils {
             return reviews;
         }
 
+        // Log.d("ParsingReviews", response);
+
         try {
             jsonResponse = new JSONObject(response);
             jsonArrayOfReivews = jsonResponse.getJSONArray(JsonUtils.LIST_RESPONSE_KEY);
@@ -68,6 +70,8 @@ public class JsonUtils {
 
     private static Review parseJsonReview(@NonNull JSONObject jsonReview) {
         String author, content, id, url;
+
+        // Log.d("Parsing review", jsonReview.toString());
 
         try {
             author = jsonReview.getString(JsonUtils.REVIEW_AUTHOR_KEY);
@@ -97,6 +101,8 @@ public class JsonUtils {
         if (response == null) {
             return movies;
         }
+
+        // Log.d("parsingMovies", response);
 
         try {
             jsonResponse = new JSONObject(response);
@@ -134,6 +140,8 @@ public class JsonUtils {
         int id;
         String title, overview, backdropPath, posterPath, date;
         double popularity, vote;
+
+        // Log.d("parseJsonMovie", movieJsonObject.toString());
 
         try {
             id = movieJsonObject.getInt(JsonUtils.MOVIE_ID_KEY);
