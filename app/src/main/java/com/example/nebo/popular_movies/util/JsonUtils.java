@@ -85,7 +85,12 @@ public class JsonUtils {
             type = jsonTrailer.getString(JsonUtils.TRAILER_TYPE_KEY);
             size = jsonTrailer.getInt(JsonUtils.TRAILER_SIZE_KEY);
 
-            trailer = new Trailer(id, key, site, size, type);
+            trailer = new Trailer(id,
+                    key,
+                    site,
+                    size,
+                    type,
+                    MovieURLUtils.buildVideoImageURL(key).toString());
         }
         catch (JSONException e) {
             e.printStackTrace();

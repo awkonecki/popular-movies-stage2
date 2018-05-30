@@ -3,19 +3,23 @@ package com.example.nebo.popular_movies.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.net.URL;
+
 public class Trailer implements Parcelable{
     private String mId;
     private String mKey;
     private String mSite;
     private int mSize;
     private String mType;
+    private String mVideoImagePath;
 
-    public Trailer(String id, String key, String site, int size, String type) {
+    public Trailer(String id, String key, String site, int size, String type, String imagePath) {
         this.mId = id;
         this.mKey = key;
         this.mSite = site;
         this.mSize = size;
         this.mType = type;
+        this.mVideoImagePath = imagePath;
     }
 
     private Trailer(Parcel src) {
@@ -25,6 +29,7 @@ public class Trailer implements Parcelable{
             this.mSite = src.readString();
             this.mSize = src.readInt();
             this.mType = src.readString();
+            this.mVideoImagePath = src.readString();
         }
     }
 
@@ -63,6 +68,7 @@ public class Trailer implements Parcelable{
             dest.writeString(this.mSite);
             dest.writeInt(this.mSize);
             dest.writeString(this.mType);
+            dest.writeString(this.mVideoImagePath);
         }
     }
 }
