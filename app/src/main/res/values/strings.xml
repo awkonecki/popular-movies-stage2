@@ -45,6 +45,8 @@
     <!-- Menu Item Values -->
     <string name="mi_sort_popular" translatable="true">Popular</string>
     <string name="mi_sort_top_rated" translatable="true">Top Rated</string>
+    <string name="mi_favorite" translatable="true">Favorite</string>
+    <string name="mi_unfavorite" translatable="true">UnFavorite</string>
 
     <!-- Content Descriptions -->
     <string name="description_background_image" translatable="true">Moive image as backdrop.</string>

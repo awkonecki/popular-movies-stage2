@@ -12,6 +12,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
 import com.example.nebo.popular_movies.data.Review;
@@ -37,6 +40,33 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     private AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> mTrailerAdapter = null;
     private static final int REVIEW_TASK = 1;
     private static final int TRAILER_TASK = 2;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = new MenuInflater(this);
+        inflater.inflate(R.menu.movie_detail_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int selected = item.getItemId();
+
+        switch(selected) {
+            case R.id.menu_item_set_favorite_status:
+                if (item.getTitle().equals(getString(R.string.mi_favorite))) {
+                    item.setTitle(getString(R.string.mi_unfavorite));
+                }
+                else {
+                    item.setTitle(getString(R.string.mi_favorite));
+                }
+                break;
+            default:
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
