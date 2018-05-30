@@ -30,9 +30,12 @@ import java.net.URL;
 
 public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
+    private static Movie mMovie = null;
     private MovieDetailBinding mDetailBinding = null;
     private AppAdapter<Review, MovieReviewViewHolder<Review>> mReviewAdapter = null;
     private AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> mTrailerAdapter = null;
+    private static final int REVIEW_TASK = 1;
+    private static final int TRAILER_TASK = 2;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,7 +57,6 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                 false);
 
         // 2. Creation of the adapters for the recycler views.
-        // @TODO Provide a listener for the trailer (implicit intent).
         this.mReviewAdapter =
                 new AppAdapter<Review, MovieReviewViewHolder<Review>>(null,
                 R.layout.movie_review_item);
@@ -86,7 +88,75 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         }
 
         this.populateUI(movie);
+        this.obtainTrailers(movie.getId());
+        this.obtainReviews(movie.getId());
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @NonNull
+    @Override
+    public android.support.v4.content.Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
+        android.support.v4.content.Loader<String> loader;
+        switch(id) {
+            case MovieDetailActivity.REVIEW_TASK:
+            case MovieDetailActivity.TRAILER_TASK:
+                loader = new MovieAsyncTaskLoader(this, args);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid ID");
+        }
+
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull android.support.v4.content.Loader<String> loader, String data) {
+        if (data != null) {
+            int taskId = loader.getId();
+
+            switch(taskId) {
+                case MovieDetailActivity.REVIEW_TASK:
+                    this.mReviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
+                    break;
+                case MovieDetailActivity.TRAILER_TASK:
+                    this.mTrailerAdapter.setAdapterData(JsonUtils.parseJsonResponseForTrailers(data));
+                    break;
+                default:
+                    throw new java.lang.UnsupportedOperationException("Invalid activity ID.");
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull android.support.v4.content.Loader<String> loader) { }
+
+    private void obtainTrailers(int movieID) {
+        // Build the args
+        Bundle args = new Bundle();
+        args.putInt(getString(R.string.bk_page_number), 1);
+        args.putString(getString(R.string.bk_request_type),
+                getString(R.string.bv_request_type_trailers));
+        args.putInt(getString(R.string.bk_movie_id), movieID);
+
+        this.startLoaderTask(MovieDetailActivity.TRAILER_TASK, args);
+    }
+
+    private void obtainReviews(int movieID) {
+        // Build the args
+        Bundle args = new Bundle();
+        args.putInt(getString(R.string.bk_page_number), 1);
+        args.putString(getString(R.string.bk_request_type),
+                getString(R.string.bv_request_type_reviews));
+        args.putInt(getString(R.string.bk_movie_id), movieID);
+
+        this.startLoaderTask(MovieDetailActivity.REVIEW_TASK, args);
+    }
+
+    private void startLoaderTask(int taskId, Bundle args) {
         LoaderManager loaderManager = getSupportLoaderManager();
         Loader<String> reviewTrailerLoader = loaderManager.getLoader(1);
 
@@ -94,39 +164,12 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
             Log.d("LoaderManagerInfo", "Null manager");
         }
 
-        Bundle args = new Bundle();
-        args.putInt(getString(R.string.bk_page_number), 1);
-        args.putString(getString(R.string.bk_request_type), getString(R.string.bv_request_type_trailers));
-        args.putInt(getString(R.string.bk_movie_id), movie.getId());
-
         if (reviewTrailerLoader == null) {
-            loaderManager.initLoader(1, args, this).forceLoad();
+            loaderManager.initLoader(taskId, args, this).forceLoad();
         }
         else {
-            loaderManager.restartLoader(1, args, this).forceLoad();
+            loaderManager.restartLoader(taskId, args, this).forceLoad();
         }
-    }
-
-    private class MovieTrailerPlayer implements AppAdapter.AppAdapterOnClickListener {
-        public void onClick(int position) {
-            Trailer trailer = mTrailerAdapter.getAdapterDataAt(position);
-
-            if (trailer != null) {
-                // make implicit intent
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setType("video/*");
-                intent.setData(MovieURLUtils.buildVideoUri(trailer.getmKey()));
-                if (intent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(intent);
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d("MovieDetailActivity", "onSaveInstaceState called");
     }
 
     private void populateUI(Movie movie) {
@@ -151,40 +194,19 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    private class MovieTrailerPlayer implements AppAdapter.AppAdapterOnClickListener {
+        public void onClick(int position) {
+            Trailer trailer = mTrailerAdapter.getAdapterDataAt(position);
 
-    @NonNull
-    @Override
-    public android.support.v4.content.Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
-        android.support.v4.content.Loader<String> loader;
-        switch(id) {
-            case 1:
-                loader = new MovieAsyncTaskLoader(this, args);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid ID");
+            if (trailer != null) {
+                // make implicit intent
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setType("video/*");
+                intent.setData(MovieURLUtils.buildVideoUri(trailer.getmKey()));
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
         }
-
-        return loader;
-    }
-
-    @Override
-    public void onLoadFinished(@NonNull android.support.v4.content.Loader<String> loader, String data) {
-        if (data != null) {
-            // @TODO fix the case one day likely with an interface for the binding instead of super
-            // class.
-            /*
-            AppAdapter<Review, MovieReviewViewHolder<Review>> reviewAdapter =
-                    (AppAdapter<Review, MovieReviewViewHolder<Review>>)
-                            this.mDetailBinding.movieDetail.rvMovieDetailReviews.getAdapter();
-            reviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
-            */
-            Log.d("network data", data);
-            this.mTrailerAdapter.setAdapterData(JsonUtils.parseJsonResponseForTrailers(data));
-        }
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull android.support.v4.content.Loader<String> loader) {
-
     }
 }
