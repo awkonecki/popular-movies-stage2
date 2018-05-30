@@ -2,6 +2,7 @@ package com.example.nebo.popular_movies;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,13 +20,19 @@ import com.example.nebo.popular_movies.databinding.MovieDetailBinding;
 import com.example.nebo.popular_movies.databinding.MovieDetailContentBinding;
 import com.example.nebo.popular_movies.data.Movie;
 import com.example.nebo.popular_movies.util.JsonUtils;
+import com.example.nebo.popular_movies.util.MovieURLUtils;
 import com.example.nebo.popular_movies.views.MovieReviewViewHolder;
 import com.example.nebo.popular_movies.views.MovieTrailerViewHolder;
 import com.squareup.picasso.Picasso;
 
+import java.net.URISyntaxException;
+import java.net.URL;
+
 public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
     private MovieDetailBinding mDetailBinding = null;
+    private AppAdapter<Review, MovieReviewViewHolder<Review>> mReviewAdapter = null;
+    private AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> mTrailerAdapter = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,11 +55,11 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
 
         // 2. Creation of the adapters for the recycler views.
         // @TODO Provide a listener for the trailer (implicit intent).
-        AppAdapter<Review, MovieReviewViewHolder<Review>> reviewAdapter =
+        this.mReviewAdapter =
                 new AppAdapter<Review, MovieReviewViewHolder<Review>>(null,
                 R.layout.movie_review_item);
-        AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> trailerAdapter =
-                new AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>(null,
+        this.mTrailerAdapter =
+                new AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>(new MovieTrailerPlayer(),
                 R.layout.movie_trailer_item);
 
         // 3. Adding of the layout manager to the recycler views.
@@ -60,8 +67,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         this.mDetailBinding.movieDetail.rvMovieDetailTrailers.setLayoutManager(trailerLayoutManager);
 
         // 4. Adding of the adapters to the recycler views.
-        this.mDetailBinding.movieDetail.rvMovieDetailReviews.setAdapter(reviewAdapter);
-        this.mDetailBinding.movieDetail.rvMovieDetailTrailers.setAdapter(trailerAdapter);
+        this.mDetailBinding.movieDetail.rvMovieDetailReviews.setAdapter(this.mReviewAdapter);
+        this.mDetailBinding.movieDetail.rvMovieDetailTrailers.setAdapter(this.mTrailerAdapter);
 
         // 5. Set settings for recycler viewer.
         this.mDetailBinding.movieDetail.rvMovieDetailReviews.setHasFixedSize(true);
@@ -97,6 +104,22 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         }
         else {
             loaderManager.restartLoader(1, args, this).forceLoad();
+        }
+    }
+
+    private class MovieTrailerPlayer implements AppAdapter.AppAdapterOnClickListener {
+        public void onClick(int position) {
+            Trailer trailer = mTrailerAdapter.getAdapterDataAt(position);
+
+            if (trailer != null) {
+                // make implicit intent
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setType("video/*");
+                intent.setData(MovieURLUtils.buildVideoUri(trailer.getmKey()));
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
         }
     }
 
@@ -156,10 +179,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
             reviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
             */
             Log.d("network data", data);
-            AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> trailerAdapter =
-                    (AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>)
-                            this.mDetailBinding.movieDetail.rvMovieDetailTrailers.getAdapter();
-            trailerAdapter.setAdapterData(JsonUtils.parseJsonResponseForTrailers(data));
+            this.mTrailerAdapter.setAdapterData(JsonUtils.parseJsonResponseForTrailers(data));
         }
     }
 

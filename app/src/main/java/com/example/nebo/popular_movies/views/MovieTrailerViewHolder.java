@@ -24,6 +24,7 @@ public class MovieTrailerViewHolder <D>
         super(binding.getRoot());
         this.mBinding = binding;
         this.mListener = listener;
+        itemView.setOnClickListener(this);
     }
 
     @Override
@@ -53,6 +54,8 @@ public class MovieTrailerViewHolder <D>
 
     @Override
     public void onClick(View v) {
-
+        Trailer trailer = null;
+        Log.d("Trailer OnClick", "Trailer onClick");
+        this.mListener.onClick(getAdapterPosition());
     }
 }

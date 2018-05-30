@@ -27,16 +27,28 @@ public class MovieURLUtils {
     private static final String MOVIE_PATH = "movie";
     private static final String SIZE_W500 = "w500";
 
-    // @TODO determine if image size is needed for backdrop later.
+    private static final String TRAILER_VIDEO_PATH = "https://www.youtube.com/watch";
 
     // QUERY PARAMETERS
     private static final String KEY_PARAM = "api_key";
     private static final String PAGE_PARAM = "page";
+    private static final String VIDEO_PARAM = "v";
 
     // QUERY VALUES
     private static final String API_KEY =
             // !!! Place key below.
             "XXX";
+
+    // https://www.youtube.com/watch?v=6ZfuNTqbHE8
+
+    public static Uri buildVideoUri(@NonNull final String videoKey) {
+        Uri uri;
+
+        uri = Uri.parse(MovieURLUtils.TRAILER_VIDEO_PATH).buildUpon().
+                appendQueryParameter(MovieURLUtils.VIDEO_PARAM, videoKey).build();
+
+        return uri;
+    }
 
     /**
      * @brief Build the url to obtain reviews from moviedb.
