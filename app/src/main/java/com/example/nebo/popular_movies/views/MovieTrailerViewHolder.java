@@ -2,6 +2,7 @@ package com.example.nebo.popular_movies.views;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.example.nebo.popular_movies.AppAdapter;
@@ -27,16 +28,19 @@ public class MovieTrailerViewHolder <D>
 
     @Override
     public void bind(D resource) {
+        Log.d("Binder called", "binding the trailer resource.");
+
         // @TODO cast handling, maybe operate on parceables since already supported?
         Trailer trailer = null;
 
         if (resource != null) {
-            if (resource.getClass().equals(Review.class)) {
+            if (resource.getClass().equals(Trailer.class)) {
                 trailer = (Trailer) resource;
             }
         }
 
         if (trailer != null) {
+            Log.d("Trailer Data", trailer.getmVideoImagePath());
             Picasso.get().load(trailer.getmVideoImagePath()).error(R.drawable.image_placeholder).
                     into(this.mBinding.ivMovieTrailerItem);
         }

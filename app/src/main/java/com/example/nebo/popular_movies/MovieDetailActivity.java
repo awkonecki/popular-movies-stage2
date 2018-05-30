@@ -30,9 +30,6 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setContentView(R.layout.movie_detail);
-        // this.mDetailBinding = DataBindingUtil.setContentView(this,
-        //        R.layout.movie_detail_content);
         mDetailBinding = DataBindingUtil.setContentView(this, R.layout.movie_detail);
 
         ActionBar actionBar = getSupportActionBar();
@@ -119,7 +116,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
 
         if (movie != null) {
             Picasso.get().load(movie.getPosterPath()).error(R.drawable.image_placeholder).
-                    into(this.mDetailBinding.movieDetail.ivMoivePosterDetail);
+                    into(this.mDetailBinding.movieDetail.ivMoviePosterDetail);
             Picasso.get().load(movie.getBackdropPath()).error(R.drawable.image_placeholder).
                     into(this.mDetailBinding.ivBackgroundDetail);
 
@@ -158,6 +155,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                             this.mDetailBinding.movieDetail.rvMovieDetailReviews.getAdapter();
             reviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
             */
+            Log.d("network data", data);
             AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> trailerAdapter =
                     (AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>)
                             this.mDetailBinding.movieDetail.rvMovieDetailTrailers.getAdapter();

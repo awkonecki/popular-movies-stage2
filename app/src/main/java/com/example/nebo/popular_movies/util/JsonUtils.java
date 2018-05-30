@@ -65,7 +65,7 @@ public class JsonUtils {
             e.printStackTrace();
         }
 
-        return null;
+        return trailers;
     }
 
     private static Trailer parseJsonTrailer(@NonNull JSONObject jsonTrailer) {
