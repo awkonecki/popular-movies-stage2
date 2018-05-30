@@ -17,7 +17,6 @@ import java.util.List;
 
 public class JsonUtils {
     private static final String LIST_RESPONSE_KEY = "results";
-    private static final String PAGE_KEY = "page";
 
     private static final String MOVIE_ID_KEY = "id";
     private static final String MOVIE_VOTE_KEY = "vote_average";
@@ -33,11 +32,66 @@ public class JsonUtils {
     private static final String REVIEW_CONTENT_KEY = "content";
     private static final String REVIEW_URL_KEY = "url";
 
-    // {"id":"5a200baa925141033608f5f0","iso_639_1":"en","iso_3166_1":"US","key":"6ZfuNTqbHE8","name":"Official Trailer","site":"YouTube","size":1080,"type":"Trailer"}
-
-
+    private static final String TRAILER_ID_KEY = "id";
+    private static final String TRAILER_KEY_KEY = "key";
+    private static final String TRAILER_SITE_KEY = "site";
+    private static final String TRAILER_TYPE_KEY = "type";
+    private static final String TRAILER_SIZE_KEY = "size";
+    
     public static List<Trailer> parseJsonResponseForTrailers(@NonNull String response) {
+        List<Trailer> trailers = new ArrayList<Trailer>();
+        JSONObject jsonResponse;
+        JSONArray jsonArrayOfTrailers;
+
+        if (response == null) {
+            return trailers;
+        }
+
+        try {
+            jsonResponse = new JSONObject(response);
+            jsonArrayOfTrailers = jsonResponse.getJSONArray(JsonUtils.LIST_RESPONSE_KEY);
+
+            for (int index = 0; index < jsonArrayOfTrailers.length(); index++) {
+                Trailer trailer = null;
+                JSONObject jsonTrailer = jsonArrayOfTrailers.getJSONObject(index);
+                trailer = JsonUtils.parseJsonTrailer(jsonTrailer);
+
+                if (trailer != null) {
+                    trailers.add(trailer);
+                }
+            }
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         return null;
+    }
+
+    private static Trailer parseJsonTrailer(@NonNull JSONObject jsonTrailer) {
+        String id, key, site, type;
+        int size;
+        Trailer trailer = null;
+
+
+        if (jsonTrailer == null) {
+            return null;
+        }
+
+        try {
+            id = jsonTrailer.getString(JsonUtils.TRAILER_ID_KEY);
+            key = jsonTrailer.getString(JsonUtils.TRAILER_KEY_KEY);
+            site = jsonTrailer.getString(JsonUtils.TRAILER_SITE_KEY);
+            type = jsonTrailer.getString(JsonUtils.TRAILER_TYPE_KEY);
+            size = jsonTrailer.getInt(JsonUtils.TRAILER_SIZE_KEY);
+
+            trailer = new Trailer(id, key, site, size, type);
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return  trailer;
     }
 
     public static List<Review> parseJsonResponseForReviews(@NonNull String response) {
