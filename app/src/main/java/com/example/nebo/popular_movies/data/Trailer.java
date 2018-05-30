@@ -13,6 +13,10 @@ public class Trailer implements Parcelable{
     private String mType;
     private String mVideoImagePath;
 
+    public String getmVideoImagePath() {
+        return this.mVideoImagePath;
+    }
+
     public Trailer(String id, String key, String site, int size, String type, String imagePath) {
         this.mId = id;
         this.mKey = key;

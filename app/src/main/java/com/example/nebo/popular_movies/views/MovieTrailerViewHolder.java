@@ -5,9 +5,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.example.nebo.popular_movies.AppAdapter;
+import com.example.nebo.popular_movies.R;
 import com.example.nebo.popular_movies.data.Review;
 import com.example.nebo.popular_movies.data.Trailer;
 import com.example.nebo.popular_movies.databinding.MovieTrailerItemBinding;
+import com.squareup.picasso.Picasso;
 
 public class MovieTrailerViewHolder <D>
         extends RecyclerView.ViewHolder
@@ -35,8 +37,8 @@ public class MovieTrailerViewHolder <D>
         }
 
         if (trailer != null) {
-            // @TODO figure out what type of object this should be
-            // this.mBinding.vvMovieTrailerItem.;
+            Picasso.get().load(trailer.getmVideoImagePath()).error(R.drawable.image_placeholder).
+                    into(this.mBinding.ivMovieTrailerItem);
         }
     }
 
