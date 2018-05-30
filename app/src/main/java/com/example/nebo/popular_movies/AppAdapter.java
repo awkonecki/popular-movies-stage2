@@ -42,6 +42,10 @@ public class AppAdapter <D, V extends RecyclerView.ViewHolder & MovieViewHolder<
         }
     }
 
+    public List<D> getAdapterData() {
+        return this.mAdapterData;
+    }
+
     @NonNull
     @Override
     public V onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

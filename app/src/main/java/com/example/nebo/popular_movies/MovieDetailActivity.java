@@ -27,12 +27,16 @@ import com.squareup.picasso.Picasso;
 
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
+    private static Movie mMovie = null;
     private MovieDetailBinding mDetailBinding = null;
     private AppAdapter<Review, MovieReviewViewHolder<Review>> mReviewAdapter = null;
     private AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> mTrailerAdapter = null;
+    private static final int REVIEW_TASK = 1;
+    private static final int TRAILER_TASK = 2;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,7 +58,6 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                 false);
 
         // 2. Creation of the adapters for the recycler views.
-        // @TODO Provide a listener for the trailer (implicit intent).
         this.mReviewAdapter =
                 new AppAdapter<Review, MovieReviewViewHolder<Review>>(null,
                 R.layout.movie_review_item);
@@ -74,90 +77,50 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         this.mDetailBinding.movieDetail.rvMovieDetailReviews.setHasFixedSize(true);
         this.mDetailBinding.movieDetail.rvMovieDetailTrailers.setHasFixedSize(true);
 
-        Intent intent = getIntent();
-        if (intent == null) {
-            finish();
-        }
+        if (savedInstanceState == null) {
+            Intent intent = getIntent();
+            if (intent == null) {
+                finish();
+            }
 
-        Movie movie = null;
+            MovieDetailActivity.mMovie = null;
 
-        if (intent != null) {
-            movie = intent.getParcelableExtra("movie");
-        }
+            if (intent != null) {
+                MovieDetailActivity.mMovie = intent.getParcelableExtra("movie");
+            }
 
-        this.populateUI(movie);
-
-        LoaderManager loaderManager = getSupportLoaderManager();
-        Loader<String> reviewTrailerLoader = loaderManager.getLoader(1);
-
-        if (loaderManager == null) {
-            Log.d("LoaderManagerInfo", "Null manager");
-        }
-
-        Bundle args = new Bundle();
-        args.putInt(getString(R.string.bk_page_number), 1);
-        args.putString(getString(R.string.bk_request_type), getString(R.string.bv_request_type_trailers));
-        args.putInt(getString(R.string.bk_movie_id), movie.getId());
-
-        if (reviewTrailerLoader == null) {
-            loaderManager.initLoader(1, args, this).forceLoad();
+            this.obtainTrailers();
+            this.obtainReviews();
         }
         else {
-            loaderManager.restartLoader(1, args, this).forceLoad();
+            MovieDetailActivity.mMovie = savedInstanceState.
+                    getParcelable(getString(R.string.bk_movie));
+            this.mTrailerAdapter.setAdapterData(savedInstanceState.
+                    <Trailer>getParcelableArrayList(getString(R.string.bk_trailers)));
+            this.mReviewAdapter.setAdapterData(savedInstanceState.
+                    <Review>getParcelableArrayList(getString(R.string.bk_reviews)));
         }
-    }
 
-    private class MovieTrailerPlayer implements AppAdapter.AppAdapterOnClickListener {
-        public void onClick(int position) {
-            Trailer trailer = mTrailerAdapter.getAdapterDataAt(position);
-
-            if (trailer != null) {
-                // make implicit intent
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setType("video/*");
-                intent.setData(MovieURLUtils.buildVideoUri(trailer.getmKey()));
-                if (intent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(intent);
-                }
-            }
-        }
+        this.populateUI();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d("MovieDetailActivity", "onSaveInstaceState called");
+        outState.putParcelable(getString(R.string.bk_movie), MovieDetailActivity.mMovie);
+        outState.putParcelableArrayList(getString(R.string.bk_reviews),
+                (ArrayList<Review>) this.mReviewAdapter.getAdapterData());
+        outState.putParcelableArrayList(getString(R.string.bk_trailers),
+                (ArrayList<Trailer>) this.mTrailerAdapter.getAdapterData());
     }
-
-    private void populateUI(Movie movie) {
-        String title = null;
-
-        if (this.mDetailBinding == null) {
-            Log.d("Populate UI", "null bindings : ");
-            return;
-        }
-
-        if (movie != null) {
-            Picasso.get().load(movie.getPosterPath()).error(R.drawable.image_placeholder).
-                    into(this.mDetailBinding.movieDetail.ivMoviePosterDetail);
-            Picasso.get().load(movie.getBackdropPath()).error(R.drawable.image_placeholder).
-                    into(this.mDetailBinding.ivBackgroundDetail);
-
-            this.setTitle(movie.getTitle());
-            this.mDetailBinding.movieDetail.tvMovieDescription.setText(movie.getOverview());
-            this.mDetailBinding.movieDetail.tvMovieDetailReleaseDate.setText(movie.getReleaseDate());
-            this.mDetailBinding.movieDetail.tvMovieDetailRating.setText(Double.toString(movie.getVote()));
-            this.mDetailBinding.movieDetail.tvMovieDetailTitle.setText(movie.getTitle());
-        }
-    }
-
 
     @NonNull
     @Override
     public android.support.v4.content.Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
         android.support.v4.content.Loader<String> loader;
         switch(id) {
-            case 1:
+            case MovieDetailActivity.REVIEW_TASK:
+            case MovieDetailActivity.TRAILER_TASK:
                 loader = new MovieAsyncTaskLoader(this, args);
                 break;
             default:
@@ -170,21 +133,105 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     @Override
     public void onLoadFinished(@NonNull android.support.v4.content.Loader<String> loader, String data) {
         if (data != null) {
-            // @TODO fix the case one day likely with an interface for the binding instead of super
-            // class.
-            /*
-            AppAdapter<Review, MovieReviewViewHolder<Review>> reviewAdapter =
-                    (AppAdapter<Review, MovieReviewViewHolder<Review>>)
-                            this.mDetailBinding.movieDetail.rvMovieDetailReviews.getAdapter();
-            reviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
-            */
-            Log.d("network data", data);
-            this.mTrailerAdapter.setAdapterData(JsonUtils.parseJsonResponseForTrailers(data));
+            int taskId = loader.getId();
+
+            switch(taskId) {
+                case MovieDetailActivity.REVIEW_TASK:
+                    this.mReviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
+                    break;
+                case MovieDetailActivity.TRAILER_TASK:
+                    this.mTrailerAdapter.setAdapterData(JsonUtils.parseJsonResponseForTrailers(data));
+                    break;
+                default:
+                    throw new java.lang.UnsupportedOperationException("Invalid activity ID.");
+            }
         }
     }
 
     @Override
-    public void onLoaderReset(@NonNull android.support.v4.content.Loader<String> loader) {
+    public void onLoaderReset(@NonNull android.support.v4.content.Loader<String> loader) { }
 
+    private void obtainTrailers() {
+        // Build the args
+        Bundle args = new Bundle();
+        args.putInt(getString(R.string.bk_page_number), 1);
+        args.putString(getString(R.string.bk_request_type),
+                getString(R.string.bv_request_type_trailers));
+        args.putInt(getString(R.string.bk_movie_id), MovieDetailActivity.mMovie.getId());
+
+        this.startLoaderTask(MovieDetailActivity.TRAILER_TASK, args);
+    }
+
+    private void obtainReviews() {
+        // Build the args
+        Bundle args = new Bundle();
+        args.putInt(getString(R.string.bk_page_number), 1);
+        args.putString(getString(R.string.bk_request_type),
+                getString(R.string.bv_request_type_reviews));
+        args.putInt(getString(R.string.bk_movie_id), MovieDetailActivity.mMovie.getId());
+
+        this.startLoaderTask(MovieDetailActivity.REVIEW_TASK, args);
+    }
+
+    private void startLoaderTask(int taskId, Bundle args) {
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> reviewTrailerLoader = loaderManager.getLoader(1);
+
+        if (loaderManager == null) {
+            Log.d("LoaderManagerInfo", "Null manager");
+        }
+
+        if (reviewTrailerLoader == null) {
+            loaderManager.initLoader(taskId, args, this).forceLoad();
+        }
+        else {
+            loaderManager.restartLoader(taskId, args, this).forceLoad();
+        }
+    }
+
+    private void populateUI() {
+        String title = getString(R.string.default_title);
+
+        if (this.mDetailBinding == null) {
+            Log.d("Populate UI", "null bindings : ");
+            return;
+        }
+
+        if (MovieDetailActivity.mMovie != null) {
+            Picasso.get().load(MovieDetailActivity.mMovie.getPosterPath()).
+                    error(R.drawable.image_placeholder).
+                    into(this.mDetailBinding.movieDetail.ivMoviePosterDetail);
+            Picasso.get().load(MovieDetailActivity.mMovie.getBackdropPath()).
+                    error(R.drawable.image_placeholder).
+                    into(this.mDetailBinding.ivBackgroundDetail);
+
+            this.setTitle(MovieDetailActivity.mMovie.getTitle());
+            this.mDetailBinding.movieDetail.tvMovieDescription.
+                    setText(MovieDetailActivity.mMovie.getOverview());
+            this.mDetailBinding.movieDetail.tvMovieDetailReleaseDate.
+                    setText(MovieDetailActivity.mMovie.getReleaseDate());
+            this.mDetailBinding.movieDetail.tvMovieDetailRating.
+                    setText(Double.toString(MovieDetailActivity.mMovie.getVote()));
+            this.mDetailBinding.movieDetail.tvMovieDetailTitle.
+                    setText(MovieDetailActivity.mMovie.getTitle());
+        }
+        else {
+            this.setTitle(title);
+        }
+    }
+
+    private class MovieTrailerPlayer implements AppAdapter.AppAdapterOnClickListener {
+        public void onClick(int position) {
+            Trailer trailer = mTrailerAdapter.getAdapterDataAt(position);
+
+            if (trailer != null) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setType("video/*");
+                intent.setData(MovieURLUtils.buildVideoUri(trailer.getmKey()));
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+        }
     }
 }
