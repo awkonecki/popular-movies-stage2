@@ -27,6 +27,7 @@ public class MovieReviewViewHolder <D>
         super(binding.getRoot());
         this.mBinding = binding;
         this.mListener = listener;
+        itemView.setOnClickListener(this);
     }
 
     @Override

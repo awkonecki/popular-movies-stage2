@@ -32,6 +32,16 @@ public class AppAdapter <D, V extends RecyclerView.ViewHolder & MovieViewHolder<
         this.notifyDataSetChanged();
     }
 
+    public D getAdapterDataAt(int position) {
+        if (this.mAdapterData == null || this.mAdapterData.isEmpty() ||
+                this.mAdapterData.size() < position || position < 0) {
+            return null;
+        }
+        else {
+            return this.mAdapterData.get(position);
+        }
+    }
+
     @NonNull
     @Override
     public V onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

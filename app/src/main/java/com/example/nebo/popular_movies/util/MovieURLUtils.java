@@ -20,21 +20,35 @@ public class MovieURLUtils {
     private static final String POPULAR_MOVIE_ENDPOINT = "movie/popular";
     private static final String TOP_RATED_ENDPOINT = "movie/top_rated";
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p";
+    private static final String VIDEO_IMAGE_BASE_URL = "https://img.youtube.com/vi"; // /6ZfuNTqbHE8/hqdefault.jpg"
+    private static final String VIDEO_IMAGE_DEFAULT_PATH = "hqdefault.jpg";
     private static final String REVIEWS_PATH = "reviews";
     private static final String VIDEOS_PATH = "videos";
     private static final String MOVIE_PATH = "movie";
     private static final String SIZE_W500 = "w500";
 
-    // @TODO determine if image size is needed for backdrop later.
+    private static final String TRAILER_VIDEO_PATH = "https://www.youtube.com/watch";
 
     // QUERY PARAMETERS
     private static final String KEY_PARAM = "api_key";
     private static final String PAGE_PARAM = "page";
+    private static final String VIDEO_PARAM = "v";
 
     // QUERY VALUES
     private static final String API_KEY =
             // !!! Place key below.
             "XXX";
+
+    // https://www.youtube.com/watch?v=6ZfuNTqbHE8
+
+    public static Uri buildVideoUri(@NonNull final String videoKey) {
+        Uri uri;
+
+        uri = Uri.parse(MovieURLUtils.TRAILER_VIDEO_PATH).buildUpon().
+                appendQueryParameter(MovieURLUtils.VIDEO_PARAM, videoKey).build();
+
+        return uri;
+    }
 
     /**
      * @brief Build the url to obtain reviews from moviedb.
@@ -120,6 +134,24 @@ public class MovieURLUtils {
         }
 
         return MovieURLUtils.buildUrl(MovieURLUtils.TOP_RATED_ENDPOINT, page);
+    }
+
+    public static URL buildVideoImageURL(@NonNull final String videoKey) {
+        Uri uri;
+        URL url = null;
+
+        uri = Uri.parse(MovieURLUtils.VIDEO_IMAGE_BASE_URL).buildUpon().
+                appendEncodedPath(videoKey).
+                appendEncodedPath(MovieURLUtils.VIDEO_IMAGE_DEFAULT_PATH).build();
+        try {
+            url = new URL(uri.toString());
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+            url = null;
+        }
+
+        return url;
     }
 
     /**
