@@ -20,6 +20,8 @@ public class MovieURLUtils {
     private static final String POPULAR_MOVIE_ENDPOINT = "movie/popular";
     private static final String TOP_RATED_ENDPOINT = "movie/top_rated";
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p";
+    private static final String VIDEO_IMAGE_BASE_URL = "https://img.youtube.com/vi"; // /6ZfuNTqbHE8/hqdefault.jpg"
+    private static final String VIDEO_IMAGE_DEFAULT_PATH = "hqdefault.jpg";
     private static final String REVIEWS_PATH = "reviews";
     private static final String VIDEOS_PATH = "videos";
     private static final String MOVIE_PATH = "movie";
@@ -120,6 +122,24 @@ public class MovieURLUtils {
         }
 
         return MovieURLUtils.buildUrl(MovieURLUtils.TOP_RATED_ENDPOINT, page);
+    }
+
+    public static URL buildVideoImageURL(@NonNull final String videoKey) {
+        Uri uri;
+        URL url = null;
+
+        uri = Uri.parse(MovieURLUtils.VIDEO_IMAGE_BASE_URL).buildUpon().
+                appendEncodedPath(videoKey).
+                appendEncodedPath(MovieURLUtils.VIDEO_IMAGE_DEFAULT_PATH).build();
+        try {
+            url = new URL(uri.toString());
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+            url = null;
+        }
+
+        return url;
     }
 
     /**

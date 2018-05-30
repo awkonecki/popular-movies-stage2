@@ -5,6 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.example.nebo.popular_movies.AppAdapter;
+import com.example.nebo.popular_movies.data.Review;
+import com.example.nebo.popular_movies.data.Trailer;
 import com.example.nebo.popular_movies.databinding.MovieTrailerItemBinding;
 
 public class MovieTrailerViewHolder <D>
@@ -23,7 +25,19 @@ public class MovieTrailerViewHolder <D>
 
     @Override
     public void bind(D resource) {
-        // this.mBinding.vvMovieTrailerItem.set
+        // @TODO cast handling, maybe operate on parceables since already supported?
+        Trailer trailer = null;
+
+        if (resource != null) {
+            if (resource.getClass().equals(Review.class)) {
+                trailer = (Trailer) resource;
+            }
+        }
+
+        if (trailer != null) {
+            // @TODO figure out what type of object this should be
+            // this.mBinding.vvMovieTrailerItem.;
+        }
     }
 
     @Override
