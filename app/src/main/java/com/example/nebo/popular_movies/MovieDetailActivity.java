@@ -92,7 +92,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
 
         Bundle args = new Bundle();
         args.putInt(getString(R.string.bk_page_number), 1);
-        args.putString(getString(R.string.bk_request_type), getString(R.string.bv_request_type_reviews));
+        args.putString(getString(R.string.bk_request_type), getString(R.string.bv_request_type_trailers));
         args.putInt(getString(R.string.bk_movie_id), movie.getId());
 
         if (reviewTrailerLoader == null) {

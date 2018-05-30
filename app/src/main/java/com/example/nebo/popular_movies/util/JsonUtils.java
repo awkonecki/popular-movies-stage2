@@ -33,6 +33,9 @@ public class JsonUtils {
     private static final String REVIEW_CONTENT_KEY = "content";
     private static final String REVIEW_URL_KEY = "url";
 
+    // {"id":"5a200baa925141033608f5f0","iso_639_1":"en","iso_3166_1":"US","key":"6ZfuNTqbHE8","name":"Official Trailer","site":"YouTube","size":1080,"type":"Trailer"}
+
+
     public static List<Trailer> parseJsonResponseForTrailers(@NonNull String response) {
         return null;
     }
