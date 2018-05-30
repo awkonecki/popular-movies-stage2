@@ -120,8 +120,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         if (movie != null) {
             Picasso.get().load(movie.getPosterPath()).error(R.drawable.image_placeholder).
                     into(this.mDetailBinding.movieDetail.ivMoivePosterDetail);
-            // Picasso.get().load(movie.getBackdropPath()).error(R.drawable.image_placeholder).
-            //        into(this.mMovieBinding.ivBackgroundDetail);
+            Picasso.get().load(movie.getBackdropPath()).error(R.drawable.image_placeholder).
+                    into(this.mDetailBinding.ivBackgroundDetail);
 
             this.setTitle(movie.getTitle());
             this.mDetailBinding.movieDetail.tvMovieDescription.setText(movie.getOverview());
@@ -152,10 +152,16 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         if (data != null) {
             // @TODO fix the case one day likely with an interface for the binding instead of super
             // class.
+            /*
             AppAdapter<Review, MovieReviewViewHolder<Review>> reviewAdapter =
                     (AppAdapter<Review, MovieReviewViewHolder<Review>>)
                             this.mDetailBinding.movieDetail.rvMovieDetailReviews.getAdapter();
             reviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
+            */
+            AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> trailerAdapter =
+                    (AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>>)
+                            this.mDetailBinding.movieDetail.rvMovieDetailTrailers.getAdapter();
+            trailerAdapter.setAdapterData(JsonUtils.parseJsonResponseForTrailers(data));
         }
     }
 

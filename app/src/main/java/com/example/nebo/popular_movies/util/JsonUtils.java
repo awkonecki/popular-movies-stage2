@@ -37,7 +37,7 @@ public class JsonUtils {
     private static final String TRAILER_SITE_KEY = "site";
     private static final String TRAILER_TYPE_KEY = "type";
     private static final String TRAILER_SIZE_KEY = "size";
-    
+
     public static List<Trailer> parseJsonResponseForTrailers(@NonNull String response) {
         List<Trailer> trailers = new ArrayList<Trailer>();
         JSONObject jsonResponse;
