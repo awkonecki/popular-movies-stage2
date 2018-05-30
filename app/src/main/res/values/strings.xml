@@ -2,6 +2,7 @@
     <string name="app_name">popular-movies</string>
     <string name="popular_title" translatable="true">Popular Movies</string>
     <string name="top_rated_title" translatable="true">Top Rated Movies</string>
+    <string name="favorite_title" translatable="true">Favorite Movies</string>
 
     <!-- Labels -->
     <string name="tv_label_title" translatable="true">Title</string>

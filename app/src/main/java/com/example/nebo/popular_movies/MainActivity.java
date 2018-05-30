@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int FETCH_DATA_ID = 14;
     private static final int POPULAR_MODE = 0;
     private static final int TOP_RATED_MODE = 1;
-    // private static final int FAVORITE_MODE = 2;
+    private static final int FAVORITE_MODE = 2;
     // private static final int SEARCH_MODE = 3;
     private static final int DEFAULT_MODE = MainActivity.POPULAR_MODE;
 
@@ -248,6 +248,8 @@ public class MainActivity extends AppCompatActivity implements
                     item.setChecked(true);
                     MenuItem menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_top_rated);
                     menuItem.setChecked(false);
+                    menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_favorites);
+                    menuItem.setChecked(false);
                     MainActivity.mMode = MainActivity.POPULAR_MODE;
                     this.setCurrentMovieData();
                     this.setView();
@@ -259,10 +261,25 @@ public class MainActivity extends AppCompatActivity implements
                     item.setChecked(true);
                     MenuItem menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_popular);
                     menuItem.setChecked(false);
+                    menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_favorites);
+                    menuItem.setChecked(false);
                     MainActivity.mMode = MainActivity.TOP_RATED_MODE;
                     this.setCurrentMovieData();
                     this.setView();
                     this.setTitle(getString(R.string.top_rated_title));
+                }
+                break;
+            case R.id.menu_item_sort_favorites:
+                if (!item.isChecked()) {
+                    item.setChecked(true);
+                    MenuItem menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_popular);
+                    menuItem.setChecked(false);
+                    menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_top_rated);
+                    menuItem.setChecked(false);
+                    MainActivity.mMode = MainActivity.FAVORITE_MODE;
+                    this.setCurrentMovieData();
+                    this.setView();
+                    this.setTitle(getString(R.string.favorite_title));
                 }
                 break;
             default:
