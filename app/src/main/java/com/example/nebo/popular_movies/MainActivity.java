@@ -174,12 +174,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MovieDBHelper help = new MovieDBHelper(this);
-        this.mDB = help.getWritableDatabase();
-        // Note for getting access to the content resolver.
-        // Does not indicate which one explicitly, will likely need to define.
-        ContentResolver resolver = getContentResolver();
-
         // Save the instance of the progress bar.
         mProgressBar = findViewById(R.id.pb_main_progress_bar);
 
