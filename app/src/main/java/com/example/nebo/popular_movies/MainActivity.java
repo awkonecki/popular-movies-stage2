@@ -18,11 +18,15 @@ import android.view.View;
 
 import com.example.nebo.popular_movies.async.MovieAsyncDBTaskLoader;
 import com.example.nebo.popular_movies.data.Movie;
+import com.example.nebo.popular_movies.data.MovieContract;
 import com.example.nebo.popular_movies.databinding.ActivityMainBinding;
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
 import com.example.nebo.popular_movies.async.MovieManagedData;
 import com.example.nebo.popular_movies.util.JsonUtils;
 import com.example.nebo.popular_movies.views.MoviePosterViewHolder;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         AppAdapter.AppAdapterOnClickListener {
@@ -143,12 +147,14 @@ public class MainActivity extends AppCompatActivity implements
                 (GridLayoutManager) MainActivity.sBinding.rvRecyclerView.getLayoutManager();
 
         // Manage the view if the instance state exists.
-        if (this.mActiveData.getMovies().size() > 0) {
+        if (this.mActiveData.getMovies().size() > 0 ||
+                this.mActiveData.getType().equals(getString(R.string.bv_request_type_favorite))) {
             this.mMovieAdapter.setAdapterData(this.mActiveData.getMovies());
             gridLayoutManager.scrollToPosition(this.mActiveData.getFirstVisible());
         }
         else {
             // Attempt to fetch data.
+            Log.d("Fetching Data", "Fetching Data");
             this.fetchData();
         }
     }
@@ -186,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements
         else {
             mPopularMovies = new MovieManagedData(getString(R.string.bv_request_type_popular));
             mTopRatedMovies = new MovieManagedData(getString(R.string.bv_request_type_top_rated));
+            mFavoriteMovies = new MovieManagedData(getString(R.string.bv_request_type_favorite));
         }
 
         // Set the current active movie data.
@@ -275,8 +282,6 @@ public class MainActivity extends AppCompatActivity implements
                     MainActivity.mMode = MainActivity.FAVORITE_MODE;
                     // query movies.
                     this.queryData();
-                    this.setCurrentMovieData();
-                    // this.setView();
                     this.setTitle(getString(R.string.favorite_title));
                 }
                 break;
@@ -378,7 +383,40 @@ public class MainActivity extends AppCompatActivity implements
             switch (loader.getId()) {
                 case MainActivity.DB_QUERY_TASK:
                     if (data != null) {
-                        Log.d("Query Size", Integer.toString(data.getCount()));
+                        Log.d("Query Size", Integer.toString(data.getCount()) + " " + Integer.toString(data.getColumnCount()));
+                        // Now need to iterate through the data and build the set of favorite movies
+                        // to display.  Definitely not ideal but that is okay.
+                        MovieManagedData movieManagedData =
+                                new MovieManagedData(getString(R.string.bv_request_type_favorite));
+                        List<Movie> movies = new LinkedList<Movie>();
+
+                        if (data.getCount() != 0) {
+                            data.moveToFirst();
+                            do {
+                                Movie movie = new Movie(
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_MOVIE_TITLE)),
+                                        data.getInt(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_MOVIE_ID)),
+                                        data.getDouble(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_RATING)),
+                                        0.0,
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_MOVIE_POSTER)),
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_MOVIE_BACKGROUND)),
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_DESCRIPTION)),
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_RELEASE_DATE)));
+                                movies.add(movie);
+                            } while (data.moveToNext());
+                        }
+
+                        movieManagedData.addMovies(movies);
+                        MainActivity.mFavoriteMovies = movieManagedData;
+                        MainActivity.this.setCurrentMovieData();
+                        MainActivity.this.setView();
                         data.close();
                     }
                     break;
