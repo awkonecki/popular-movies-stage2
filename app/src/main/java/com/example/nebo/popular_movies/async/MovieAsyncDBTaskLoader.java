@@ -39,15 +39,24 @@ public class MovieAsyncDBTaskLoader extends AsyncTaskLoader<Cursor> {
             }
 
             if (action.equals(resources.getString(R.string.bv_db_task_action_query))) {
-                cursor = resolver.query(MovieContract.MovieEntry.CONTENT_URI,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null);
-                if (cursor != null) {
-                    Log.d("Query Operation", Integer.toString(cursor.getCount()));
-                    cursor.close();
+                Movie movie = this.mArgs.getParcelable(resources.getString(R.string.bk_movie));
+
+                if (movie != null) {
+                    cursor = resolver.query(MovieContract.MovieEntry.CONTENT_URI,
+                            null,
+                            MovieContract.MovieEntry.COLUMN_MOVIE_ID + "=?",
+                            new String[]{Integer.toString(movie.getId())},
+                            null,
+                            null);
+                }
+                else {
+                    cursor = resolver.query(
+                            MovieContract.MovieEntry.CONTENT_URI,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null);
                 }
             }
             else if (action.equals(resources.getString(R.string.bv_db_task_action_insert))) {

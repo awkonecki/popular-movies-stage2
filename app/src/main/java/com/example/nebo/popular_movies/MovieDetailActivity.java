@@ -3,6 +3,8 @@ package com.example.nebo.popular_movies;
 import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -16,6 +18,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 
 import com.example.nebo.popular_movies.async.MovieAsyncDBTaskLoader;
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
@@ -41,39 +45,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     private static final int TRAILER_TASK = 2;
     private static final int FAVORITE_TASK = 3;
     private static final int UNFAVORITE_TASK = 4;
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = new MenuInflater(this);
-        inflater.inflate(R.menu.movie_detail_menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int selected = item.getItemId();
-
-        switch(selected) {
-            case R.id.menu_item_set_favorite_status:
-                if (item.getTitle().equals(getString(R.string.mi_favorite))) {
-                    item.setTitle(getString(R.string.mi_unfavorite));
-                    item.setIcon(R.drawable.ic_favorite_border_black_24dp);
-
-                    this.setMovieAsFavorite();
-                }
-                else {
-                    item.setTitle(getString(R.string.mi_favorite));
-                    item.setIcon(R.drawable.ic_favorite_red_24dp);
-
-                    this.removeMovieAsFavorite();
-                }
-                break;
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+    private static final int QUERY_MOVIE_TASK = 5;
+    private boolean isFavorite = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -139,18 +112,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
 
         this.populateUI();
-
-        // @TODO Check to see if the movie is a favorite of the user.
-        // @TODO Set the menu item context appropriately.
-        android.support.v4.app.LoaderManager loaderManager = this.getSupportLoaderManager();
-        Loader<Cursor> loader = loaderManager.getLoader(MovieDetailActivity.FAVORITE_TASK);
-
-        if (loader == null) {
-            // loaderManager.initLoader(MovieDetailActivity.FAVORITE_TASK, null, new DatabaseAsyncLoader()).forceLoad();
-        }
-        else {
-            // loaderManager.restartLoader(MovieDetailActivity.FAVORITE_TASK, null, new DatabaseAsyncLoader()).forceLoad();
-        }
+        this.queryForMovie();
     }
 
     @Override
@@ -212,9 +174,8 @@ public class MovieDetailActivity extends AppCompatActivity {
 
             switch (id) {
                 case MovieDetailActivity.FAVORITE_TASK:
-                    loader = new MovieAsyncDBTaskLoader(MovieDetailActivity.this, args);
-                    break;
                 case MovieDetailActivity.UNFAVORITE_TASK:
+                case MovieDetailActivity.QUERY_MOVIE_TASK:
                     loader = new MovieAsyncDBTaskLoader(MovieDetailActivity.this, args);
                     break;
                 default:
@@ -226,11 +187,39 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
+            switch (loader.getId()) {
+                case MovieDetailActivity.QUERY_MOVIE_TASK:
+                    if (data.getCount() == 0) {
+                        MovieDetailActivity.this.setNotFavoriteVisible();
+                    }
+                    else {
+                        MovieDetailActivity.this.setFavoriteVisible();
+                    }
+                    data.close();
+                    break;
+            }
         }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) { }
+    }
+
+    private void setFavoriteVisible() {
+        this.mDetailBinding.fabFavorite.setImageResource(R.drawable.ic_favorite_blue_24dp);
+        this.isFavorite = true;
+    }
+
+    private void setNotFavoriteVisible() {
+        this.mDetailBinding.fabFavorite.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+        this.isFavorite = false;
+    }
+
+    private void queryForMovie() {
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.bk_movie), MovieDetailActivity.mMovie);
+        args.putString(getString(R.string.bk_db_task_action),
+                getString(R.string.bv_db_task_action_query));
+        this.startDataBaseLoaderTask(MovieDetailActivity.QUERY_MOVIE_TASK, args);
     }
 
     private void setMovieAsFavorite() {
@@ -324,9 +313,30 @@ public class MovieDetailActivity extends AppCompatActivity {
                     setText(Double.toString(MovieDetailActivity.mMovie.getVote()));
             this.mDetailBinding.movieDetail.tvMovieDetailTitle.
                     setText(MovieDetailActivity.mMovie.getTitle());
+
+            this.mDetailBinding.fabFavorite.setVisibility(View.VISIBLE);
+            this.mDetailBinding.fabFavorite.setEnabled(true);
+            this.mDetailBinding.fabFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (MovieDetailActivity.this.isFavorite) {
+                        Log.d("Button OnClick", "Button onClick event true");
+                        MovieDetailActivity.this.removeMovieAsFavorite();
+                        MovieDetailActivity.this.queryForMovie();
+                    }
+                    else {
+                        Log.d("Button OnClick", "Button onClick event false");
+                        MovieDetailActivity.this.setMovieAsFavorite();
+                        MovieDetailActivity.this.queryForMovie();
+                    }
+                }
+            });
+            this.mDetailBinding.fabFavorite.bringToFront();
         }
         else {
             this.setTitle(title);
+            this.mDetailBinding.fabFavorite.setVisibility(View.INVISIBLE);
+            this.mDetailBinding.fabFavorite.setEnabled(false);
         }
     }
 
