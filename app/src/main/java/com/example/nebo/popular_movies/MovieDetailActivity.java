@@ -1,8 +1,8 @@
 package com.example.nebo.popular_movies;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.databinding.DataBindingUtil;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,7 +20,6 @@ import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
 import com.example.nebo.popular_movies.data.Review;
 import com.example.nebo.popular_movies.data.Trailer;
 import com.example.nebo.popular_movies.databinding.MovieDetailBinding;
-import com.example.nebo.popular_movies.databinding.MovieDetailContentBinding;
 import com.example.nebo.popular_movies.data.Movie;
 import com.example.nebo.popular_movies.util.JsonUtils;
 import com.example.nebo.popular_movies.util.MovieURLUtils;
@@ -28,11 +27,9 @@ import com.example.nebo.popular_movies.views.MovieReviewViewHolder;
 import com.example.nebo.popular_movies.views.MovieTrailerViewHolder;
 import com.squareup.picasso.Picasso;
 
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 
-public class MovieDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
+public class MovieDetailActivity extends AppCompatActivity {
 
     private static Movie mMovie = null;
     private MovieDetailBinding mDetailBinding = null;
@@ -40,6 +37,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     private AppAdapter<Trailer, MovieTrailerViewHolder<Trailer>> mTrailerAdapter = null;
     private static final int REVIEW_TASK = 1;
     private static final int TRAILER_TASK = 2;
+    private static final int FAVORITE_TASK = 3;
+    private static final int UNFAVORITE_TASK = 4;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -56,9 +55,15 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
             case R.id.menu_item_set_favorite_status:
                 if (item.getTitle().equals(getString(R.string.mi_favorite))) {
                     item.setTitle(getString(R.string.mi_unfavorite));
+                    item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+
+                    // @TODO Make task to remove from database.
                 }
                 else {
                     item.setTitle(getString(R.string.mi_favorite));
+                    item.setIcon(R.drawable.ic_favorite_red_24dp);
+
+                    // @TODO Make task to add to database.
                 }
                 break;
             default:
@@ -132,6 +137,9 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         }
 
         this.populateUI();
+
+        // @TODO Check to see if the movie is a favorite of the user.
+        // @TODO Set the menu item context appropriately.
     }
 
     @Override
@@ -144,42 +152,71 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                 (ArrayList<Trailer>) this.mTrailerAdapter.getAdapterData());
     }
 
-    @NonNull
-    @Override
-    public android.support.v4.content.Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
-        android.support.v4.content.Loader<String> loader;
-        switch(id) {
-            case MovieDetailActivity.REVIEW_TASK:
-            case MovieDetailActivity.TRAILER_TASK:
-                loader = new MovieAsyncTaskLoader(this, args);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid ID");
-        }
+    private class NetworkAsyncLoader implements LoaderManager.LoaderCallbacks<String> {
+        @NonNull
+        @Override
+        public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
+            Loader<String> loader = null;
 
-        return loader;
-    }
-
-    @Override
-    public void onLoadFinished(@NonNull android.support.v4.content.Loader<String> loader, String data) {
-        if (data != null) {
-            int taskId = loader.getId();
-
-            switch(taskId) {
+            switch (id) {
                 case MovieDetailActivity.REVIEW_TASK:
-                    this.mReviewAdapter.setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
-                    break;
                 case MovieDetailActivity.TRAILER_TASK:
-                    this.mTrailerAdapter.setAdapterData(JsonUtils.parseJsonResponseForTrailers(data));
+                    loader = new MovieAsyncTaskLoader(MovieDetailActivity.this, args);
                     break;
                 default:
-                    throw new java.lang.UnsupportedOperationException("Invalid activity ID.");
+                    throw new UnsupportedOperationException("Illegal id.");
+            }
+
+            return loader;
+        }
+
+        @Override
+        public void onLoadFinished(@NonNull Loader<String> loader, String data) {
+            switch (loader.getId()) {
+                case MovieDetailActivity.REVIEW_TASK:
+                    if (data != null) {
+                        MovieDetailActivity.this.mReviewAdapter.
+                                setAdapterData(JsonUtils.parseJsonResponseForReviews(data));
+                    }
+                    break;
+                case MovieDetailActivity.TRAILER_TASK:
+                    if (data != null) {
+                        MovieDetailActivity.this.mTrailerAdapter.
+                                setAdapterData(JsonUtils.parseJsonResponseForTrailers(data));
+                    }
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Illegal id.");
             }
         }
+
+        @Override
+        public void onLoaderReset(@NonNull Loader<String> loader) { }
     }
 
-    @Override
-    public void onLoaderReset(@NonNull android.support.v4.content.Loader<String> loader) { }
+    private class DatabaseAsyncLoader implements android.app.LoaderManager.LoaderCallbacks<Cursor> {
+        @Override
+        public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            switch (id) {
+                case MovieDetailActivity.FAVORITE_TASK:
+                    break;
+                case MovieDetailActivity.UNFAVORITE_TASK:
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Illegal id.");
+            }
+
+            return null;
+        }
+
+        @Override
+        public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+
+        }
+
+        @Override
+        public void onLoaderReset(android.content.Loader<Cursor> loader) { }
+    }
 
     private void obtainTrailers() {
         // Build the args
@@ -189,7 +226,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                 getString(R.string.bv_request_type_trailers));
         args.putInt(getString(R.string.bk_movie_id), MovieDetailActivity.mMovie.getId());
 
-        this.startLoaderTask(MovieDetailActivity.TRAILER_TASK, args);
+        this.startNetworkLoaderTask(MovieDetailActivity.TRAILER_TASK, args);
     }
 
     private void obtainReviews() {
@@ -200,10 +237,10 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                 getString(R.string.bv_request_type_reviews));
         args.putInt(getString(R.string.bk_movie_id), MovieDetailActivity.mMovie.getId());
 
-        this.startLoaderTask(MovieDetailActivity.REVIEW_TASK, args);
+        this.startNetworkLoaderTask(MovieDetailActivity.REVIEW_TASK, args);
     }
 
-    private void startLoaderTask(int taskId, Bundle args) {
+    private void startNetworkLoaderTask(int taskId, Bundle args) {
         LoaderManager loaderManager = getSupportLoaderManager();
         Loader<String> reviewTrailerLoader = loaderManager.getLoader(1);
 
@@ -212,10 +249,10 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         }
 
         if (reviewTrailerLoader == null) {
-            loaderManager.initLoader(taskId, args, this).forceLoad();
+            loaderManager.initLoader(taskId, args, new NetworkAsyncLoader()).forceLoad();
         }
         else {
-            loaderManager.restartLoader(taskId, args, this).forceLoad();
+            loaderManager.restartLoader(taskId, args, new NetworkAsyncLoader()).forceLoad();
         }
     }
 
