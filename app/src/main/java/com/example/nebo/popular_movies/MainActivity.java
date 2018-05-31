@@ -185,6 +185,8 @@ public class MainActivity extends AppCompatActivity implements
                     savedInstanceState.getParcelable(getString(R.string.bsik_popular));
             MainActivity.mTopRatedMovies =
                     savedInstanceState.getParcelable(getString(R.string.bsik_top_rated));
+            MainActivity.mFavoriteMovies =
+                    savedInstanceState.getParcelable(getString(R.string.bsik_favorite));
             MainActivity.mMode =
                     savedInstanceState.getInt(getString(R.string.bsik_mode),
                             MainActivity.DEFAULT_MODE);
@@ -310,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements
         // Save the current stack of movies already queried.
         outState.putParcelable(getString(R.string.bsik_popular), MainActivity.mPopularMovies);
         outState.putParcelable(getString(R.string.bsik_top_rated), MainActivity.mTopRatedMovies);
+        outState.putParcelable(getString(R.string.bsik_favorite), MainActivity.mFavoriteMovies);
         outState.putInt(getString(R.string.bsik_mode), mMode);
     }
 
