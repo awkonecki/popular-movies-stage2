@@ -101,7 +101,11 @@ public class MovieContentProvider extends ContentProvider {
         }
 
         // Notification by the cursor to the resolver.
-        ContentResolver resolver = getContext().getContentResolver();
+        ContentResolver resolver = null;
+
+        if (getContext() != null) {
+            resolver =  getContext().getContentResolver();
+        }
 
         if (cursor != null && resolver != null) {
             cursor.setNotificationUri(resolver, uri);

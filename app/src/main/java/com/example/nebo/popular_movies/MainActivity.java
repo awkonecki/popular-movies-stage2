@@ -1,9 +1,8 @@
 package com.example.nebo.popular_movies;
 
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.Parcelable;
+import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -11,35 +10,38 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 
+import com.example.nebo.popular_movies.async.MovieAsyncDBTaskLoader;
+import com.example.nebo.popular_movies.data.Movie;
+import com.example.nebo.popular_movies.data.MovieContract;
+import com.example.nebo.popular_movies.databinding.ActivityMainBinding;
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
 import com.example.nebo.popular_movies.async.MovieManagedData;
-import com.example.nebo.popular_movies.data.Movie;
-import com.example.nebo.popular_movies.data.MovieDBHelper;
 import com.example.nebo.popular_movies.util.JsonUtils;
+import com.example.nebo.popular_movies.views.MoviePosterViewHolder;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<String>,
-        MovieAdapter.MovieAdatperOnClickListener {
+        AppAdapter.AppAdapterOnClickListener {
+
+    private static ActivityMainBinding sBinding = null;
 
     private static boolean mLoading = false;
     private static final int FETCH_DATA_ID = 14;
     private static final int POPULAR_MODE = 0;
     private static final int TOP_RATED_MODE = 1;
     private static final int FAVORITE_MODE = 2;
+    private static final int DB_QUERY_TASK = 3;
     private static final int DEFAULT_MODE = MainActivity.POPULAR_MODE;
 
-    private MovieAdapter mMovieAdapter = null;
-    private RecyclerView mRecyclerView = null;
-    private ProgressBar mProgressBar = null;
+    private AppAdapter<Movie, MoviePosterViewHolder<Movie>> mMovieAdapter = null;
     private static Menu mMenu = null;
 
     private static MovieManagedData mPopularMovies = null;
@@ -49,56 +51,18 @@ public class MainActivity extends AppCompatActivity implements
 
     private MovieManagedData mActiveData = null;
 
-    private SQLiteDatabase mDB = null;
-
-    /**
-     * @brief Scroll listener class that when no more vertical in the downward direction can occur
-     * will perform a the fetching of a new page of movies.
-     * @note Although the listener itself is okay, I believe that this is not really a clean way to
-     * implement this functionality.
-     * @note Is still a bit jumpy when doing quick scrolling (jumps to the top or bottom directly).
-     * @reference https://stackoverflow.com/questions/36127734/detect-when-recyclerview-reaches-the-bottom-most-position-while-scrolling
-     */
-    private class MovieScrollListener extends RecyclerView.OnScrollListener {
-        /**
-         * @brief If no more vertical scrolling down can occur then will attempt to fetch more data.
-         * @param recyclerView The recycler view that is responsible for displaying the movies.
-         * @param dx current horizontal position
-         * @param dy current vertical position
-         */
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-
-            GridLayoutManager layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
-            MovieAdapter adapter = (MovieAdapter) recyclerView.getAdapter();
-
-            int totalItems = layoutManager.getItemCount();
-            int lastPosition = layoutManager.findLastVisibleItemPosition();
-
-            // Really only needed when changing view state or life-cycle so might not need to do it
-            // here.
-            int firstPosition = layoutManager.findFirstVisibleItemPosition();
-            adapter.getMovieData().setFirstVisible(firstPosition);
-
-            if (lastPosition > (totalItems * 9 / 10)) {
-                MainActivity.this.fetchData();
-            }
-        }
-    }
-
     /**
      * @brief Set the UI element visibility during the fetch.
      */
     private void onFetch() {
-        mProgressBar.setVisibility(View.VISIBLE);
+        MainActivity.sBinding.pbMainProgressBar.setVisibility(View.VISIBLE);
     }
 
     /**
      * @brief Set the UI element visibility after a fetch operation.
      */
     private void fetchComplete() {
-        mProgressBar.setVisibility(View.INVISIBLE);
+        MainActivity.sBinding.pbMainProgressBar.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -122,10 +86,32 @@ public class MainActivity extends AppCompatActivity implements
             this.onFetch();
 
             if (movieLoader == null) {
-                loaderManager.initLoader(MainActivity.FETCH_DATA_ID, args, this).forceLoad();
+                loaderManager.initLoader(MainActivity.FETCH_DATA_ID, args, new NetworkAsyncTaskLoader()).forceLoad();
             } else {
-                loaderManager.restartLoader(MainActivity.FETCH_DATA_ID, args, this).forceLoad();
+                loaderManager.restartLoader(MainActivity.FETCH_DATA_ID, args, new NetworkAsyncTaskLoader()).forceLoad();
             }
+        }
+    }
+
+    private void queryData() {
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<Cursor> loader = loaderManager.getLoader(MainActivity.DB_QUERY_TASK);
+
+        Bundle args = new Bundle();
+        args.putString(getString(R.string.bk_db_task_action),
+                getString(R.string.bv_db_task_action_query));
+
+        if (loader == null) {
+            loaderManager.initLoader(MainActivity.DB_QUERY_TASK,
+                    args,
+                    new DataBaseAsyncTaskLoader()
+            ).forceLoad();
+        }
+        else {
+            loaderManager.restartLoader(MainActivity.DB_QUERY_TASK,
+                    args,
+                    new DataBaseAsyncTaskLoader()
+            ).forceLoad();
         }
     }
 
@@ -143,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements
                 this.mActiveData = MainActivity.mTopRatedMovies;
                 break;
             case MainActivity.FAVORITE_MODE:
+                this.mActiveData = MainActivity.mFavoriteMovies;
                 break;
             default:
                 break;
@@ -156,15 +143,18 @@ public class MainActivity extends AppCompatActivity implements
      * the mAdapter when it populates the views setting it back to zero???
      */
     private void setView() {
-        GridLayoutManager gridLayoutManager = (GridLayoutManager) this.mRecyclerView.getLayoutManager();
+        GridLayoutManager gridLayoutManager =
+                (GridLayoutManager) MainActivity.sBinding.rvRecyclerView.getLayoutManager();
 
         // Manage the view if the instance state exists.
-        if (this.mActiveData.getMovies().size() > 0) {
-            this.mMovieAdapter.setMovieData(this.mActiveData);
+        if (this.mActiveData.getMovies().size() > 0 ||
+                this.mActiveData.getType().equals(getString(R.string.bv_request_type_favorite))) {
+            this.mMovieAdapter.setAdapterData(this.mActiveData.getMovies());
             gridLayoutManager.scrollToPosition(this.mActiveData.getFirstVisible());
         }
         else {
             // Attempt to fetch data.
+            Log.d("Fetching Data", "Fetching Data");
             this.fetchData();
         }
     }
@@ -172,33 +162,31 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // Save the instance of the progress bar.
-        mProgressBar = findViewById(R.id.pb_main_progress_bar);
+        MainActivity.sBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         // Setup of the recycler view for the main activity.
         // 1. Create an adapter.
-        mMovieAdapter = new MovieAdapter(this);
-
-        // 2. Cache the resource of the recyclerview with the class instance.
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_recycler_view);
+        mMovieAdapter = new AppAdapter<Movie, MoviePosterViewHolder<Movie>>(
+                this,
+                R.layout.grid_item
+        );
 
         // 3. Make a new LayoutManager of the `GridLayout` type.
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this,
                 2, GridLayoutManager.VERTICAL, false);
 
-        // 4. Set the properties that the recycleviewer wil use.
-        mRecyclerView.addOnScrollListener(new MovieScrollListener());
-        mRecyclerView.setAdapter(mMovieAdapter);
-        mRecyclerView.setLayoutManager(gridLayoutManager);
-        mRecyclerView.setHasFixedSize(true);
+        // 4. Set the properties that the recycler viewer wil use.
+        MainActivity.sBinding.rvRecyclerView.setAdapter(mMovieAdapter);
+        MainActivity.sBinding.rvRecyclerView.setLayoutManager(gridLayoutManager);
+        MainActivity.sBinding.rvRecyclerView.setHasFixedSize(true);
 
         if (savedInstanceState != null) {
             MainActivity.mPopularMovies =
                     savedInstanceState.getParcelable(getString(R.string.bsik_popular));
             MainActivity.mTopRatedMovies =
                     savedInstanceState.getParcelable(getString(R.string.bsik_top_rated));
+            MainActivity.mFavoriteMovies =
+                    savedInstanceState.getParcelable(getString(R.string.bsik_favorite));
             MainActivity.mMode =
                     savedInstanceState.getInt(getString(R.string.bsik_mode),
                             MainActivity.DEFAULT_MODE);
@@ -206,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements
         else {
             mPopularMovies = new MovieManagedData(getString(R.string.bv_request_type_popular));
             mTopRatedMovies = new MovieManagedData(getString(R.string.bv_request_type_top_rated));
+            mFavoriteMovies = new MovieManagedData(getString(R.string.bv_request_type_favorite));
         }
 
         // Set the current active movie data.
@@ -293,8 +282,8 @@ public class MainActivity extends AppCompatActivity implements
                     menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_top_rated);
                     menuItem.setChecked(false);
                     MainActivity.mMode = MainActivity.FAVORITE_MODE;
-                    this.setCurrentMovieData();
-                    this.setView();
+                    // query movies.
+                    this.queryData();
                     this.setTitle(getString(R.string.favorite_title));
                 }
                 break;
@@ -306,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void OnClick(int position) {
+    public void onClick(int position) {
         Intent intent = new Intent(this, MovieDetailActivity.class);
         intent.putExtra("movie", this.mActiveData.getMovies().get(position));
 
@@ -323,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements
         // Save the current stack of movies already queried.
         outState.putParcelable(getString(R.string.bsik_popular), MainActivity.mPopularMovies);
         outState.putParcelable(getString(R.string.bsik_top_rated), MainActivity.mTopRatedMovies);
+        outState.putParcelable(getString(R.string.bsik_favorite), MainActivity.mFavoriteMovies);
         outState.putInt(getString(R.string.bsik_mode), mMode);
     }
 
@@ -330,52 +320,114 @@ public class MainActivity extends AppCompatActivity implements
     // END ANDROID LIFE-CYCLE METHODS
     //**********************************************************************************************
 
-    //**********************************************************************************************
-    // START LOADER METHODS FOR ASYNC TASKS
-    //
-    // Loader is to be used if tied to the activity lifecycle
-    // allow for user interface changes and commuinicate with Activity
-    // For this Loader is used due to population of a recycler view adapter
-    //**********************************************************************************************
-    @NonNull
-    @Override
-    public Loader<String> onCreateLoader(int id, final @Nullable Bundle args) {
-        switch(id) {
-            case MainActivity.FETCH_DATA_ID:
-                return new MovieAsyncTaskLoader(this, args);
-            default:
-                throw new java.lang.IllegalArgumentException("Unsupported ID value.");
+    /**
+     * @class NetworkAsyncTaskLoader
+     * @brief LoaderManager definition for performing network async tasks for the main activity.
+     */
+    private class NetworkAsyncTaskLoader implements LoaderManager.LoaderCallbacks<String> {
+        @NonNull
+        @Override
+        public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
+            switch(id) {
+                case MainActivity.FETCH_DATA_ID:
+                    return new MovieAsyncTaskLoader(MainActivity.this, args);
+                default:
+                    throw new java.lang.IllegalArgumentException("Unsupported ID value.");
+            }
         }
+
+        @Override
+        public void onLoadFinished(@NonNull Loader<String> loader, String response) {
+            // Only process if response contains content.
+            if (response != null && !response.isEmpty()) {
+                // Add the list of movies to the overall list.
+                MainActivity.this.mActiveData.addMovies(JsonUtils.parseJsonResponseForMovies(response));
+
+                // Inform the movie adapter of the change.
+                MainActivity.this.mMovieAdapter.setAdapterData(MainActivity.this.mActiveData.getMovies());
+                MainActivity.this.mActiveData.incrementPage();
+            }
+
+            // Ensure that the loading progress bar is made invisible.
+            MainActivity.this.fetchComplete();
+
+            // Ensure that more loading of data can occur.
+            MainActivity.mLoading = false;
+        }
+
+        @Override
+        public void onLoaderReset(@NonNull Loader<String> loader) { }
     }
 
     /**
-     * @brief Responsible for cleaning up the AsyncTaskLoaders.  Ths assumption of this method is
-     * that it is a single point of usage.
-     * @param loader Loader that has finished.
-     * @param response String of the result of the Loader itself.
+     * @class DataBaseAsyncTaskLoader
+     * @brief LoaderManager definition for performing database async tasks for the main activity.
      */
-    @Override
-    public void onLoadFinished(@NonNull Loader<String> loader, String response) {
-        // Only process if response contains content.
-        if (response != null && !response.isEmpty()) {
-            // Add the list of movies to the overall list.
-            this.mActiveData.addMovies(JsonUtils.parseJsonResponseForMovies(response));
+    private class DataBaseAsyncTaskLoader implements LoaderManager.LoaderCallbacks<Cursor> {
 
-            // Inform the movie adapter of the change.
-            this.mMovieAdapter.setMovieData(this.mActiveData);
-            this.mActiveData.incrementPage();
+        @NonNull
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+            Loader<Cursor> loader = null;
+            switch (id) {
+                case MainActivity.DB_QUERY_TASK:
+                    loader = new MovieAsyncDBTaskLoader(MainActivity.this, args);
+                    break;
+                default:
+                    throw new UnsupportedOperationException(
+                            "Invalid DB Query Task ID - MainActivity"
+                    );
+            }
+            return loader;
         }
 
-        // Ensure that the loading progress bar is made invisible.
-        this.fetchComplete();
+        @Override
+        public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+            switch (loader.getId()) {
+                case MainActivity.DB_QUERY_TASK:
+                    if (data != null) {
+                        Log.d("Query Size", Integer.toString(data.getCount()) + " " + Integer.toString(data.getColumnCount()));
+                        // Now need to iterate through the data and build the set of favorite movies
+                        // to display.  Definitely not ideal but that is okay.
+                        MovieManagedData movieManagedData =
+                                new MovieManagedData(getString(R.string.bv_request_type_favorite));
+                        List<Movie> movies = new LinkedList<Movie>();
 
-        // Ensure that more loading of data can occur.
-        MainActivity.mLoading = false;
-    }
+                        if (data.getCount() != 0) {
+                            data.moveToFirst();
+                            do {
+                                Movie movie = new Movie(
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_MOVIE_TITLE)),
+                                        data.getInt(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_MOVIE_ID)),
+                                        data.getDouble(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_RATING)),
+                                        0.0,
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_MOVIE_POSTER)),
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_MOVIE_BACKGROUND)),
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_DESCRIPTION)),
+                                        data.getString(data.getColumnIndex(
+                                                MovieContract.MovieEntry.COLUMN_RELEASE_DATE)));
+                                movies.add(movie);
+                            } while (data.moveToNext());
+                        }
 
-    @Override
-    public void onLoaderReset(@NonNull Loader<String> loader) {
+                        movieManagedData.addMovies(movies);
+                        MainActivity.mFavoriteMovies = movieManagedData;
+                        MainActivity.this.setCurrentMovieData();
+                        MainActivity.this.setView();
+                        data.close();
+                    }
+                    break;
+            }
+        }
 
+        @Override
+        public void onLoaderReset(@NonNull Loader<Cursor> loader) { }
     }
 
     //**********************************************************************************************

@@ -3,7 +3,6 @@
     package="com.example.nebo.popular_movies">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- @TODO Figure out the DB permission path. -->
     <uses-permission android:name="com.example.nebo.popular_movies" />
     
     <application
