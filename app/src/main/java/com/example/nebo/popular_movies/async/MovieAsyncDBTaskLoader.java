@@ -54,8 +54,6 @@ public class MovieAsyncDBTaskLoader extends AsyncTaskLoader<Cursor> {
                 Movie movie = this.mArgs.getParcelable(resources.getString(R.string.bk_movie));
                 ContentValues values = new ContentValues();
 
-                Log.d("Attempting Assertion", "Attempting assertion");
-
                 if (movie != null) {
                     // Setup the content values that of which the insertion operation will act upon.
                     values.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
@@ -63,13 +61,28 @@ public class MovieAsyncDBTaskLoader extends AsyncTaskLoader<Cursor> {
 
                     Uri uri = resolver.insert(MovieContract.MovieEntry.CONTENT_URI, values);
 
-                    if (uri != null) {
-                        Log.d("Insertion Operation", uri.toString());
+                    if (uri == null) {
+                        Log.e("Insertion Operation Failed", "Null Uri.");
                     }
                 }
             }
             else if (action.equals(resources.getString(R.string.bv_db_task_action_delete))) {
-                resolver.delete(null, null, null);
+                Movie movie = this.mArgs.getParcelable(resources.getString(R.string.bk_movie));
+
+                if (movie != null) {
+                    long numberOfDeletions = resolver.delete(
+                            MovieContract.MovieEntry.CONTENT_URI,
+                            MovieContract.MovieEntry.COLUMN_MOVIE_ID +
+                                    "=" +
+                                    Integer.toString(movie.getId()),
+                            null);
+
+                    if (numberOfDeletions != 1) {
+                        Log.e("Deletion Operation Failed", "Deletions that occurred " +
+                                Long.toString(numberOfDeletions));
+                    }
+                }
+
             }
             else {
                 throw new java.lang.UnsupportedOperationException(

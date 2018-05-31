@@ -59,14 +59,13 @@ public class MovieDetailActivity extends AppCompatActivity {
                     item.setTitle(getString(R.string.mi_unfavorite));
                     item.setIcon(R.drawable.ic_favorite_border_black_24dp);
 
-                    // @TODO Make task to add to database.
                     this.setMovieAsFavorite();
                 }
                 else {
                     item.setTitle(getString(R.string.mi_favorite));
                     item.setIcon(R.drawable.ic_favorite_red_24dp);
 
-                    // @TODO Make task to remove from database.
+                    this.removeMovieAsFavorite();
                 }
                 break;
             default:
@@ -147,10 +146,10 @@ public class MovieDetailActivity extends AppCompatActivity {
         Loader<Cursor> loader = loaderManager.getLoader(MovieDetailActivity.FAVORITE_TASK);
 
         if (loader == null) {
-            loaderManager.initLoader(MovieDetailActivity.FAVORITE_TASK, null, new DatabaseAsyncLoader()).forceLoad();
+            // loaderManager.initLoader(MovieDetailActivity.FAVORITE_TASK, null, new DatabaseAsyncLoader()).forceLoad();
         }
         else {
-            loaderManager.restartLoader(MovieDetailActivity.FAVORITE_TASK, null, new DatabaseAsyncLoader()).forceLoad();
+            // loaderManager.restartLoader(MovieDetailActivity.FAVORITE_TASK, null, new DatabaseAsyncLoader()).forceLoad();
         }
     }
 
@@ -216,6 +215,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                     loader = new MovieAsyncDBTaskLoader(MovieDetailActivity.this, args);
                     break;
                 case MovieDetailActivity.UNFAVORITE_TASK:
+                    loader = new MovieAsyncDBTaskLoader(MovieDetailActivity.this, args);
                     break;
                 default:
                     throw new UnsupportedOperationException("Illegal id.");

@@ -172,6 +172,11 @@ public class MovieContentProvider extends ContentProvider {
                         selection,
                         selectionArgs);
                 break;
+            case MovieContentProvider.MOVIES_WITH_ID:
+                deletedCount = database.delete(MovieContract.PATH_FAVORITE_MOVIES,
+                        selection,
+                        selectionArgs);
+                break;
             default:
                 throw new UnsupportedOperationException(
                         "The delete method does not support the intented Uri operation."
