@@ -1,9 +1,8 @@
 package com.example.nebo.popular_movies;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Parcelable;
+import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -18,17 +17,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import com.example.nebo.popular_movies.data.Movie;
+import com.example.nebo.popular_movies.databinding.ActivityMainBinding;
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
 import com.example.nebo.popular_movies.async.MovieManagedData;
-import com.example.nebo.popular_movies.data.Movie;
-import com.example.nebo.popular_movies.data.MovieDBHelper;
 import com.example.nebo.popular_movies.util.JsonUtils;
-
-import java.util.ArrayList;
+import com.example.nebo.popular_movies.views.MoviePosterViewHolder;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<String>,
-        MovieAdapter.MovieAdatperOnClickListener {
+        AppAdapter.AppAdapterOnClickListener {
+
+    private static ActivityMainBinding sBinding = null;
 
     private static boolean mLoading = false;
     private static final int FETCH_DATA_ID = 14;
@@ -37,9 +37,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int FAVORITE_MODE = 2;
     private static final int DEFAULT_MODE = MainActivity.POPULAR_MODE;
 
-    private MovieAdapter mMovieAdapter = null;
-    private RecyclerView mRecyclerView = null;
-    private ProgressBar mProgressBar = null;
+    private AppAdapter<Movie, MoviePosterViewHolder<Movie>> mMovieAdapter = null;
     private static Menu mMenu = null;
 
     private static MovieManagedData mPopularMovies = null;
@@ -48,8 +46,6 @@ public class MainActivity extends AppCompatActivity implements
     private static int mMode = MainActivity.DEFAULT_MODE;
 
     private MovieManagedData mActiveData = null;
-
-    private SQLiteDatabase mDB = null;
 
     /**
      * @brief Scroll listener class that when no more vertical in the downward direction can occur
@@ -91,14 +87,14 @@ public class MainActivity extends AppCompatActivity implements
      * @brief Set the UI element visibility during the fetch.
      */
     private void onFetch() {
-        mProgressBar.setVisibility(View.VISIBLE);
+        MainActivity.sBinding.pbMainProgressBar.setVisibility(View.VISIBLE);
     }
 
     /**
      * @brief Set the UI element visibility after a fetch operation.
      */
     private void fetchComplete() {
-        mProgressBar.setVisibility(View.INVISIBLE);
+        MainActivity.sBinding.pbMainProgressBar.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -156,11 +152,12 @@ public class MainActivity extends AppCompatActivity implements
      * the mAdapter when it populates the views setting it back to zero???
      */
     private void setView() {
-        GridLayoutManager gridLayoutManager = (GridLayoutManager) this.mRecyclerView.getLayoutManager();
+        GridLayoutManager gridLayoutManager =
+                (GridLayoutManager) MainActivity.sBinding.rvRecyclerView.getLayoutManager();
 
         // Manage the view if the instance state exists.
         if (this.mActiveData.getMovies().size() > 0) {
-            this.mMovieAdapter.setMovieData(this.mActiveData);
+            this.mMovieAdapter.setAdapterData(this.mActiveData.getMovies());
             gridLayoutManager.scrollToPosition(this.mActiveData.getFirstVisible());
         }
         else {
@@ -172,27 +169,24 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // Save the instance of the progress bar.
-        mProgressBar = findViewById(R.id.pb_main_progress_bar);
+        MainActivity.sBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         // Setup of the recycler view for the main activity.
         // 1. Create an adapter.
-        mMovieAdapter = new MovieAdapter(this);
-
-        // 2. Cache the resource of the recyclerview with the class instance.
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_recycler_view);
+        mMovieAdapter = new AppAdapter<Movie, MoviePosterViewHolder<Movie>>(
+                this,
+                R.layout.grid_item
+        );
 
         // 3. Make a new LayoutManager of the `GridLayout` type.
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this,
                 2, GridLayoutManager.VERTICAL, false);
 
-        // 4. Set the properties that the recycleviewer wil use.
-        mRecyclerView.addOnScrollListener(new MovieScrollListener());
-        mRecyclerView.setAdapter(mMovieAdapter);
-        mRecyclerView.setLayoutManager(gridLayoutManager);
-        mRecyclerView.setHasFixedSize(true);
+        // 4. Set the properties that the recycler viewer wil use.
+        MainActivity.sBinding.rvRecyclerView.addOnScrollListener(new MovieScrollListener());
+        MainActivity.sBinding.rvRecyclerView.setAdapter(mMovieAdapter);
+        MainActivity.sBinding.rvRecyclerView.setLayoutManager(gridLayoutManager);
+        MainActivity.sBinding.rvRecyclerView.setHasFixedSize(true);
 
         if (savedInstanceState != null) {
             MainActivity.mPopularMovies =
@@ -306,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void OnClick(int position) {
+    public void onClick(int position) {
         Intent intent = new Intent(this, MovieDetailActivity.class);
         intent.putExtra("movie", this.mActiveData.getMovies().get(position));
 
@@ -362,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements
             this.mActiveData.addMovies(JsonUtils.parseJsonResponseForMovies(response));
 
             // Inform the movie adapter of the change.
-            this.mMovieAdapter.setMovieData(this.mActiveData);
+            this.mMovieAdapter.setAdapterData(this.mActiveData.getMovies());
             this.mActiveData.incrementPage();
         }
 
