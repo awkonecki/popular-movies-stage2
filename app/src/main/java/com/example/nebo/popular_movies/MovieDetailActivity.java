@@ -59,13 +59,14 @@ public class MovieDetailActivity extends AppCompatActivity {
                     item.setTitle(getString(R.string.mi_unfavorite));
                     item.setIcon(R.drawable.ic_favorite_border_black_24dp);
 
-                    // @TODO Make task to remove from database.
+                    // @TODO Make task to add to database.
+                    this.setMovieAsFavorite();
                 }
                 else {
                     item.setTitle(getString(R.string.mi_favorite));
                     item.setIcon(R.drawable.ic_favorite_red_24dp);
 
-                    // @TODO Make task to add to database.
+                    // @TODO Make task to remove from database.
                 }
                 break;
             default:
@@ -209,8 +210,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             Loader<Cursor> loader = null;
-            args = new Bundle();
-            args.putString(getString(R.string.bk_db_task_action), getString(R.string.bv_db_task_action_query));
 
             switch (id) {
                 case MovieDetailActivity.FAVORITE_TASK:
@@ -232,6 +231,34 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) { }
+    }
+
+    private void setMovieAsFavorite() {
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.bk_movie), MovieDetailActivity.mMovie);
+        args.putString(getString(R.string.bk_db_task_action),
+                getString(R.string.bv_db_task_action_insert));
+        this.startDataBaseLoaderTask(MovieDetailActivity.FAVORITE_TASK, args);
+    }
+
+    private void removeMovieAsFavorite() {
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.bk_movie), MovieDetailActivity.mMovie);
+        args.putString(getString(R.string.bk_db_task_action),
+                getString(R.string.bv_db_task_action_delete));
+        this.startDataBaseLoaderTask(MovieDetailActivity.UNFAVORITE_TASK, args);
+    }
+
+    private void startDataBaseLoaderTask(int taskId, Bundle args) {
+        LoaderManager loaderManager = this.getSupportLoaderManager();
+        Loader<Cursor> loader = loaderManager.getLoader(taskId);
+
+        if (loader == null) {
+            loaderManager.initLoader(taskId, args, new DatabaseAsyncLoader()).forceLoad();
+        }
+        else {
+            loaderManager.restartLoader(taskId, args, new DatabaseAsyncLoader()).forceLoad();
+        }
     }
 
     private void obtainTrailers() {

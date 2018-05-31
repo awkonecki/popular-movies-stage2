@@ -1,5 +1,7 @@
 package com.example.nebo.popular_movies.async;
 
+import android.content.ContentValues;
+import android.net.Uri;
 import android.support.v4.content.AsyncTaskLoader;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.nebo.popular_movies.R;
+import com.example.nebo.popular_movies.data.Movie;
 import com.example.nebo.popular_movies.data.MovieContract;
 
 public class MovieAsyncDBTaskLoader extends AsyncTaskLoader<Cursor> {
@@ -48,7 +51,22 @@ public class MovieAsyncDBTaskLoader extends AsyncTaskLoader<Cursor> {
                 }
             }
             else if (action.equals(resources.getString(R.string.bv_db_task_action_insert))) {
-                resolver.insert(null, null);
+                Movie movie = this.mArgs.getParcelable(resources.getString(R.string.bk_movie));
+                ContentValues values = new ContentValues();
+
+                Log.d("Attempting Assertion", "Attempting assertion");
+
+                if (movie != null) {
+                    // Setup the content values that of which the insertion operation will act upon.
+                    values.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
+                    values.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movie.getId());
+
+                    Uri uri = resolver.insert(MovieContract.MovieEntry.CONTENT_URI, values);
+
+                    if (uri != null) {
+                        Log.d("Insertion Operation", uri.toString());
+                    }
+                }
             }
             else if (action.equals(resources.getString(R.string.bv_db_task_action_delete))) {
                 resolver.delete(null, null, null);

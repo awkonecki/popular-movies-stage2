@@ -94,6 +94,8 @@ public class MovieContentProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
+            case MovieContentProvider.MOVIES_WITH_ID:
+                break;
             default:
                 throw new UnsupportedOperationException("Un-supported Uri operation.");
         }
