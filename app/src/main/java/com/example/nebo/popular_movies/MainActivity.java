@@ -1,9 +1,7 @@
 package com.example.nebo.popular_movies;
 
-import android.content.AsyncTaskLoader;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,13 +10,13 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 
+import com.example.nebo.popular_movies.async.MovieAsyncDBTaskLoader;
 import com.example.nebo.popular_movies.data.Movie;
 import com.example.nebo.popular_movies.databinding.ActivityMainBinding;
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
@@ -36,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int POPULAR_MODE = 0;
     private static final int TOP_RATED_MODE = 1;
     private static final int FAVORITE_MODE = 2;
+    private static final int DB_QUERY_TASK = 3;
     private static final int DEFAULT_MODE = MainActivity.POPULAR_MODE;
 
     private AppAdapter<Movie, MoviePosterViewHolder<Movie>> mMovieAdapter = null;
@@ -47,42 +46,6 @@ public class MainActivity extends AppCompatActivity implements
     private static int mMode = MainActivity.DEFAULT_MODE;
 
     private MovieManagedData mActiveData = null;
-
-    /**
-     * @brief Scroll listener class that when no more vertical in the downward direction can occur
-     * will perform a the fetching of a new page of movies.
-     * @note Although the listener itself is okay, I believe that this is not really a clean way to
-     * implement this functionality.
-     * @note Is still a bit jumpy when doing quick scrolling (jumps to the top or bottom directly).
-     * @reference https://stackoverflow.com/questions/36127734/detect-when-recyclerview-reaches-the-bottom-most-position-while-scrolling
-     */
-    private class MovieScrollListener extends RecyclerView.OnScrollListener {
-        /**
-         * @brief If no more vertical scrolling down can occur then will attempt to fetch more data.
-         * @param recyclerView The recycler view that is responsible for displaying the movies.
-         * @param dx current horizontal position
-         * @param dy current vertical position
-         */
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-
-            GridLayoutManager layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
-            MovieAdapter adapter = (MovieAdapter) recyclerView.getAdapter();
-
-            int totalItems = layoutManager.getItemCount();
-            int lastPosition = layoutManager.findLastVisibleItemPosition();
-
-            // Really only needed when changing view state or life-cycle so might not need to do it
-            // here.
-            int firstPosition = layoutManager.findFirstVisibleItemPosition();
-            adapter.getMovieData().setFirstVisible(firstPosition);
-
-            if (lastPosition > (totalItems * 9 / 10)) {
-                MainActivity.this.fetchData();
-            }
-        }
-    }
 
     /**
      * @brief Set the UI element visibility during the fetch.
@@ -123,6 +86,28 @@ public class MainActivity extends AppCompatActivity implements
             } else {
                 loaderManager.restartLoader(MainActivity.FETCH_DATA_ID, args, new NetworkAsyncTaskLoader()).forceLoad();
             }
+        }
+    }
+
+    private void queryData() {
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<Cursor> loader = loaderManager.getLoader(MainActivity.DB_QUERY_TASK);
+
+        Bundle args = new Bundle();
+        args.putString(getString(R.string.bk_db_task_action),
+                getString(R.string.bv_db_task_action_query));
+
+        if (loader == null) {
+            loaderManager.initLoader(MainActivity.DB_QUERY_TASK,
+                    args,
+                    new DataBaseAsyncTaskLoader()
+            ).forceLoad();
+        }
+        else {
+            loaderManager.restartLoader(MainActivity.DB_QUERY_TASK,
+                    args,
+                    new DataBaseAsyncTaskLoader()
+            ).forceLoad();
         }
     }
 
@@ -185,7 +170,6 @@ public class MainActivity extends AppCompatActivity implements
                 2, GridLayoutManager.VERTICAL, false);
 
         // 4. Set the properties that the recycler viewer wil use.
-        MainActivity.sBinding.rvRecyclerView.addOnScrollListener(new MovieScrollListener());
         MainActivity.sBinding.rvRecyclerView.setAdapter(mMovieAdapter);
         MainActivity.sBinding.rvRecyclerView.setLayoutManager(gridLayoutManager);
         MainActivity.sBinding.rvRecyclerView.setHasFixedSize(true);
@@ -289,8 +273,10 @@ public class MainActivity extends AppCompatActivity implements
                     menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_top_rated);
                     menuItem.setChecked(false);
                     MainActivity.mMode = MainActivity.FAVORITE_MODE;
+                    // query movies.
+                    this.queryData();
                     this.setCurrentMovieData();
-                    this.setView();
+                    // this.setView();
                     this.setTitle(getString(R.string.favorite_title));
                 }
                 break;
@@ -374,18 +360,33 @@ public class MainActivity extends AppCompatActivity implements
         @NonNull
         @Override
         public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-            return null;
+            Loader<Cursor> loader = null;
+            switch (id) {
+                case MainActivity.DB_QUERY_TASK:
+                    loader = new MovieAsyncDBTaskLoader(MainActivity.this, args);
+                    break;
+                default:
+                    throw new UnsupportedOperationException(
+                            "Invalid DB Query Task ID - MainActivity"
+                    );
+            }
+            return loader;
         }
 
         @Override
         public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-
+            switch (loader.getId()) {
+                case MainActivity.DB_QUERY_TASK:
+                    if (data != null) {
+                        Log.d("Query Size", Integer.toString(data.getCount()));
+                        data.close();
+                    }
+                    break;
+            }
         }
 
         @Override
-        public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-
-        }
+        public void onLoaderReset(@NonNull Loader<Cursor> loader) { }
     }
 
     //**********************************************************************************************

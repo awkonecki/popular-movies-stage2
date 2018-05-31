@@ -25,6 +25,11 @@ public class MovieContract {
         public static final String TABLE_NAME = "Favorite_Movies";
         public static final String COLUMN_MOVIE_TITLE = "Movie_Title";
         public static final String COLUMN_MOVIE_ID = "Movie_ID";
+        public static final String COLUMN_MOVIE_POSTER = "Movie_Poster";
+        public static final String COLUMN_MOVIE_BACKGROUND = "Movie_Background";
+        public static final String COLUMN_RELEASE_DATE = "Movie_Release_Date";
+        public static final String COLUMN_RATING = "Movie_Rating";
+        public static final String COLUMN_DESCRIPTION = "Movie_Description";
     }
 
 }

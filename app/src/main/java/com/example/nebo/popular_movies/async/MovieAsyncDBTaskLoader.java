@@ -67,6 +67,11 @@ public class MovieAsyncDBTaskLoader extends AsyncTaskLoader<Cursor> {
                     // Setup the content values that of which the insertion operation will act upon.
                     values.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
                     values.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movie.getId());
+                    values.put(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER, movie.getPosterPath());
+                    values.put(MovieContract.MovieEntry.COLUMN_MOVIE_BACKGROUND, movie.getBackdropPath());
+                    values.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
+                    values.put(MovieContract.MovieEntry.COLUMN_RATING, movie.getVote());
+                    values.put(MovieContract.MovieEntry.COLUMN_DESCRIPTION, movie.getOverview());
 
                     Uri uri = resolver.insert(MovieContract.MovieEntry.CONTENT_URI, values);
 
