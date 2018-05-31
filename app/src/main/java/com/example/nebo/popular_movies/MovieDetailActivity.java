@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.example.nebo.popular_movies.async.MovieAsyncDBTaskLoader;
 import com.example.nebo.popular_movies.async.MovieAsyncTaskLoader;
 import com.example.nebo.popular_movies.data.Review;
 import com.example.nebo.popular_movies.data.Trailer;
@@ -140,6 +142,15 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         // @TODO Check to see if the movie is a favorite of the user.
         // @TODO Set the menu item context appropriately.
+        android.support.v4.app.LoaderManager loaderManager = this.getSupportLoaderManager();
+        Loader<Cursor> loader = loaderManager.getLoader(MovieDetailActivity.FAVORITE_TASK);
+
+        if (loader == null) {
+            loaderManager.initLoader(MovieDetailActivity.FAVORITE_TASK, null, new DatabaseAsyncLoader()).forceLoad();
+        }
+        else {
+            loaderManager.restartLoader(MovieDetailActivity.FAVORITE_TASK, null, new DatabaseAsyncLoader()).forceLoad();
+        }
     }
 
     @Override
@@ -194,11 +205,16 @@ public class MovieDetailActivity extends AppCompatActivity {
         public void onLoaderReset(@NonNull Loader<String> loader) { }
     }
 
-    private class DatabaseAsyncLoader implements android.app.LoaderManager.LoaderCallbacks<Cursor> {
+    private class DatabaseAsyncLoader implements LoaderManager.LoaderCallbacks<Cursor> {
         @Override
-        public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            Loader<Cursor> loader = null;
+            args = new Bundle();
+            args.putString(getString(R.string.bk_db_task_action), getString(R.string.bv_db_task_action_query));
+
             switch (id) {
                 case MovieDetailActivity.FAVORITE_TASK:
+                    loader = new MovieAsyncDBTaskLoader(MovieDetailActivity.this, args);
                     break;
                 case MovieDetailActivity.UNFAVORITE_TASK:
                     break;
@@ -206,16 +222,16 @@ public class MovieDetailActivity extends AppCompatActivity {
                     throw new UnsupportedOperationException("Illegal id.");
             }
 
-            return null;
+            return loader;
         }
 
         @Override
-        public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
         }
 
         @Override
-        public void onLoaderReset(android.content.Loader<Cursor> loader) { }
+        public void onLoaderReset(Loader<Cursor> loader) { }
     }
 
     private void obtainTrailers() {
@@ -242,7 +258,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void startNetworkLoaderTask(int taskId, Bundle args) {
         LoaderManager loaderManager = getSupportLoaderManager();
-        Loader<String> reviewTrailerLoader = loaderManager.getLoader(1);
+        Loader<String> reviewTrailerLoader = loaderManager.getLoader(taskId);
 
         if (loaderManager == null) {
             Log.d("LoaderManagerInfo", "Null manager");

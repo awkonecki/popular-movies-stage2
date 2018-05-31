@@ -1,13 +1,15 @@
 package com.example.nebo.popular_movies.async;
 
-import android.content.AsyncTaskLoader;
+import android.support.v4.content.AsyncTaskLoader;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.nebo.popular_movies.R;
+import com.example.nebo.popular_movies.data.MovieContract;
 
 public class MovieAsyncDBTaskLoader extends AsyncTaskLoader<Cursor> {
 
@@ -34,10 +36,16 @@ public class MovieAsyncDBTaskLoader extends AsyncTaskLoader<Cursor> {
             }
 
             if (action.equals(resources.getString(R.string.bv_db_task_action_query))) {
-                cursor = resolver.query(null,
-                        null, null,
-                        null, null,
+                cursor = resolver.query(MovieContract.MovieEntry.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null,
                         null);
+                if (cursor != null) {
+                    Log.d("Query Operation", Integer.toString(cursor.getCount()));
+                    cursor.close();
+                }
             }
             else if (action.equals(resources.getString(R.string.bv_db_task_action_insert))) {
                 resolver.insert(null, null);
