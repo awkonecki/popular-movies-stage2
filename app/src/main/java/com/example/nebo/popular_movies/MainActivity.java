@@ -1,6 +1,8 @@
 package com.example.nebo.popular_movies;
 
+import android.content.AsyncTaskLoader;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
@@ -25,7 +27,6 @@ import com.example.nebo.popular_movies.util.JsonUtils;
 import com.example.nebo.popular_movies.views.MoviePosterViewHolder;
 
 public class MainActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<String>,
         AppAdapter.AppAdapterOnClickListener {
 
     private static ActivityMainBinding sBinding = null;
@@ -118,9 +119,9 @@ public class MainActivity extends AppCompatActivity implements
             this.onFetch();
 
             if (movieLoader == null) {
-                loaderManager.initLoader(MainActivity.FETCH_DATA_ID, args, this).forceLoad();
+                loaderManager.initLoader(MainActivity.FETCH_DATA_ID, args, new NetworkAsyncTaskLoader()).forceLoad();
             } else {
-                loaderManager.restartLoader(MainActivity.FETCH_DATA_ID, args, this).forceLoad();
+                loaderManager.restartLoader(MainActivity.FETCH_DATA_ID, args, new NetworkAsyncTaskLoader()).forceLoad();
             }
         }
     }
@@ -139,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements
                 this.mActiveData = MainActivity.mTopRatedMovies;
                 break;
             case MainActivity.FAVORITE_MODE:
+                this.mActiveData = MainActivity.mFavoriteMovies;
                 break;
             default:
                 break;
@@ -324,52 +326,66 @@ public class MainActivity extends AppCompatActivity implements
     // END ANDROID LIFE-CYCLE METHODS
     //**********************************************************************************************
 
-    //**********************************************************************************************
-    // START LOADER METHODS FOR ASYNC TASKS
-    //
-    // Loader is to be used if tied to the activity lifecycle
-    // allow for user interface changes and commuinicate with Activity
-    // For this Loader is used due to population of a recycler view adapter
-    //**********************************************************************************************
-    @NonNull
-    @Override
-    public Loader<String> onCreateLoader(int id, final @Nullable Bundle args) {
-        switch(id) {
-            case MainActivity.FETCH_DATA_ID:
-                return new MovieAsyncTaskLoader(this, args);
-            default:
-                throw new java.lang.IllegalArgumentException("Unsupported ID value.");
+    /**
+     * @class NetworkAsyncTaskLoader
+     * @brief LoaderManager definition for performing network async tasks for the main activity.
+     */
+    private class NetworkAsyncTaskLoader implements LoaderManager.LoaderCallbacks<String> {
+        @NonNull
+        @Override
+        public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
+            switch(id) {
+                case MainActivity.FETCH_DATA_ID:
+                    return new MovieAsyncTaskLoader(MainActivity.this, args);
+                default:
+                    throw new java.lang.IllegalArgumentException("Unsupported ID value.");
+            }
         }
+
+        @Override
+        public void onLoadFinished(@NonNull Loader<String> loader, String response) {
+            // Only process if response contains content.
+            if (response != null && !response.isEmpty()) {
+                // Add the list of movies to the overall list.
+                MainActivity.this.mActiveData.addMovies(JsonUtils.parseJsonResponseForMovies(response));
+
+                // Inform the movie adapter of the change.
+                MainActivity.this.mMovieAdapter.setAdapterData(MainActivity.this.mActiveData.getMovies());
+                MainActivity.this.mActiveData.incrementPage();
+            }
+
+            // Ensure that the loading progress bar is made invisible.
+            MainActivity.this.fetchComplete();
+
+            // Ensure that more loading of data can occur.
+            MainActivity.mLoading = false;
+        }
+
+        @Override
+        public void onLoaderReset(@NonNull Loader<String> loader) { }
     }
 
     /**
-     * @brief Responsible for cleaning up the AsyncTaskLoaders.  Ths assumption of this method is
-     * that it is a single point of usage.
-     * @param loader Loader that has finished.
-     * @param response String of the result of the Loader itself.
+     * @class DataBaseAsyncTaskLoader
+     * @brief LoaderManager definition for performing database async tasks for the main activity.
      */
-    @Override
-    public void onLoadFinished(@NonNull Loader<String> loader, String response) {
-        // Only process if response contains content.
-        if (response != null && !response.isEmpty()) {
-            // Add the list of movies to the overall list.
-            this.mActiveData.addMovies(JsonUtils.parseJsonResponseForMovies(response));
+    private class DataBaseAsyncTaskLoader implements LoaderManager.LoaderCallbacks<Cursor> {
 
-            // Inform the movie adapter of the change.
-            this.mMovieAdapter.setAdapterData(this.mActiveData.getMovies());
-            this.mActiveData.incrementPage();
+        @NonNull
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+            return null;
         }
 
-        // Ensure that the loading progress bar is made invisible.
-        this.fetchComplete();
+        @Override
+        public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
 
-        // Ensure that more loading of data can occur.
-        MainActivity.mLoading = false;
-    }
+        }
 
-    @Override
-    public void onLoaderReset(@NonNull Loader<String> loader) {
+        @Override
+        public void onLoaderReset(@NonNull Loader<Cursor> loader) {
 
+        }
     }
 
     //**********************************************************************************************
