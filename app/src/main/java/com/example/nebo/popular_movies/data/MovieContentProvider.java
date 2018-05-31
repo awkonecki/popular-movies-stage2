@@ -94,6 +94,8 @@ public class MovieContentProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
+            case MovieContentProvider.MOVIES_WITH_ID:
+                break;
             default:
                 throw new UnsupportedOperationException("Un-supported Uri operation.");
         }
@@ -166,6 +168,11 @@ public class MovieContentProvider extends ContentProvider {
 
         switch(match) {
             case MovieContentProvider.MOVIES:
+                deletedCount = database.delete(MovieContract.PATH_FAVORITE_MOVIES,
+                        selection,
+                        selectionArgs);
+                break;
+            case MovieContentProvider.MOVIES_WITH_ID:
                 deletedCount = database.delete(MovieContract.PATH_FAVORITE_MOVIES,
                         selection,
                         selectionArgs);

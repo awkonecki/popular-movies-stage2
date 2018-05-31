@@ -39,6 +39,8 @@ public class MovieDBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // For now just dump the table.  Will later want to append new information and set a default
         // for already existing entries.
-        // @TODO
+        // This function only gets performed if a new version number is created.
+        db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
+        onCreate(db);
     }
 }

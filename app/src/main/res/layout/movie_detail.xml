@@ -3,30 +3,46 @@
 <layout>
     <android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/detail_parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:contentDescription="@string/description_background_image"
-            android:id="@+id/iv_background_detail"
-            android:layout_width="match_parent"
+        <android.support.design.widget.CoordinatorLayout
+            android:id="@+id/cl_main_layout"
             android:layout_height="match_parent"
-            android:scaleType="fitXY"
-            android:alpha="0.15"/>
+            android:layout_width="match_parent">
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            <ImageView
+                android:contentDescription="@string/description_background_image"
+                android:id="@+id/iv_background_detail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:alpha="0.15"/>
 
-            <include
-                android:id="@+id/movie_detail"
-                layout="@layout/movie_detail_content"
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <include
+                    android:id="@+id/movie_detail"
+                    layout="@layout/movie_detail_content"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent" />
+
+            </ScrollView>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_favorite"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_width="match_parent" />
-
-        </ScrollView>
+                android:layout_gravity="end|bottom"
+                android:src="@drawable/ic_favorite_border_black_24dp"
+                android:layout_margin="16dp"
+                app:rippleColor="@color/colorPrimary"
+                app:backgroundTint="#FFFFFF"/>
+        </android.support.design.widget.CoordinatorLayout>
     </android.support.constraint.ConstraintLayout>
 </layout>

@@ -34,8 +34,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int FETCH_DATA_ID = 14;
     private static final int POPULAR_MODE = 0;
     private static final int TOP_RATED_MODE = 1;
-    // private static final int FAVORITE_MODE = 2;
-    // private static final int SEARCH_MODE = 3;
+    private static final int FAVORITE_MODE = 2;
     private static final int DEFAULT_MODE = MainActivity.POPULAR_MODE;
 
     private MovieAdapter mMovieAdapter = null;
@@ -45,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private static MovieManagedData mPopularMovies = null;
     private static MovieManagedData mTopRatedMovies = null;
+    private static MovieManagedData mFavoriteMovies = null;
     private static int mMode = MainActivity.DEFAULT_MODE;
 
     private MovieManagedData mActiveData = null;
@@ -142,6 +142,8 @@ public class MainActivity extends AppCompatActivity implements
             case MainActivity.TOP_RATED_MODE:
                 this.mActiveData = MainActivity.mTopRatedMovies;
                 break;
+            case MainActivity.FAVORITE_MODE:
+                break;
             default:
                 break;
         }
@@ -171,12 +173,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        MovieDBHelper help = new MovieDBHelper(this);
-        this.mDB = help.getWritableDatabase();
-        // Note for getting access to the content resolver.
-        // Does not indicate which one explicitly, will likely need to define.
-        ContentResolver resolver = getContentResolver();
 
         // Save the instance of the progress bar.
         mProgressBar = findViewById(R.id.pb_main_progress_bar);
@@ -233,6 +229,26 @@ public class MainActivity extends AppCompatActivity implements
             item.setChecked(false);
             item = menu.findItem(R.id.menu_item_sort_top_rated);
             item.setChecked(true);
+            item = MainActivity.mMenu.findItem(R.id.menu_item_sort_favorites);
+            item.setChecked(false);
+        }
+        else if (MainActivity.mMode == MainActivity.POPULAR_MODE) {
+            MenuItem item = null;
+            item = menu.findItem(R.id.menu_item_sort_popular);
+            item.setChecked(true);
+            item = menu.findItem(R.id.menu_item_sort_top_rated);
+            item.setChecked(false);
+            item = MainActivity.mMenu.findItem(R.id.menu_item_sort_favorites);
+            item.setChecked(false);
+        }
+        else {
+            MenuItem item = null;
+            item = menu.findItem(R.id.menu_item_sort_popular);
+            item.setChecked(false);
+            item = menu.findItem(R.id.menu_item_sort_top_rated);
+            item.setChecked(false);
+            item = MainActivity.mMenu.findItem(R.id.menu_item_sort_favorites);
+            item.setChecked(true);
         }
 
         return true;
@@ -248,6 +264,8 @@ public class MainActivity extends AppCompatActivity implements
                     item.setChecked(true);
                     MenuItem menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_top_rated);
                     menuItem.setChecked(false);
+                    menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_favorites);
+                    menuItem.setChecked(false);
                     MainActivity.mMode = MainActivity.POPULAR_MODE;
                     this.setCurrentMovieData();
                     this.setView();
@@ -259,10 +277,25 @@ public class MainActivity extends AppCompatActivity implements
                     item.setChecked(true);
                     MenuItem menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_popular);
                     menuItem.setChecked(false);
+                    menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_favorites);
+                    menuItem.setChecked(false);
                     MainActivity.mMode = MainActivity.TOP_RATED_MODE;
                     this.setCurrentMovieData();
                     this.setView();
                     this.setTitle(getString(R.string.top_rated_title));
+                }
+                break;
+            case R.id.menu_item_sort_favorites:
+                if (!item.isChecked()) {
+                    item.setChecked(true);
+                    MenuItem menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_popular);
+                    menuItem.setChecked(false);
+                    menuItem = MainActivity.mMenu.findItem(R.id.menu_item_sort_top_rated);
+                    menuItem.setChecked(false);
+                    MainActivity.mMode = MainActivity.FAVORITE_MODE;
+                    this.setCurrentMovieData();
+                    this.setView();
+                    this.setTitle(getString(R.string.favorite_title));
                 }
                 break;
             default:
@@ -276,15 +309,6 @@ public class MainActivity extends AppCompatActivity implements
     public void OnClick(int position) {
         Intent intent = new Intent(this, MovieDetailActivity.class);
         intent.putExtra("movie", this.mActiveData.getMovies().get(position));
-
-        /*
-        intent.putExtra(getString(R.string.ik_movie_poster), this.mActiveData.getMovies().get(position).getPosterPath());
-        intent.putExtra(getString(R.string.ik_movie_title), this.mActiveData.getMovies().get(position).getTitle());
-        intent.putExtra(getString(R.string.ik_movie_backdrop), this.mActiveData.getMovies().get(position).getBackdropPath());
-        intent.putExtra(getString(R.string.ik_movie_synopsis), this.mActiveData.getMovies().get(position).getOverview());
-        intent.putExtra(getString(R.string.ik_user_rating), this.mActiveData.getMovies().get(position).getVote());
-        intent.putExtra(getString(R.string.ik_release_date), this.mActiveData.getMovies().get(position).getReleaseDate());
-        */
 
         startActivity(intent);
     }

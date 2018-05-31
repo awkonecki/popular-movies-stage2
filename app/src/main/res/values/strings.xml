@@ -2,6 +2,7 @@
     <string name="app_name">popular-movies</string>
     <string name="popular_title" translatable="true">Popular Movies</string>
     <string name="top_rated_title" translatable="true">Top Rated Movies</string>
+    <string name="favorite_title" translatable="true">Favorite Movies</string>
 
     <!-- Labels -->
     <string name="tv_label_title" translatable="true">Title</string>
@@ -33,6 +34,7 @@
     <string name="bk_movie" translatable="false">movie</string>
     <string name="bk_reviews" translatable="false">reviews</string>
     <string name="bk_trailers" translatable="false">trailers</string>
+    <string name="bk_db_task_action" translatable="false">action</string>
 
     <!-- Bundle Values -->
     <string name="bv_request_type_popular" translatable="false">popular</string>
@@ -40,10 +42,15 @@
     <string name="bv_request_type_search" translatable="false">search</string>
     <string name="bv_request_type_trailers" translatable="false">trailers</string>
     <string name="bv_request_type_reviews" translatable="false">reviews</string>
+    <string name="bv_db_task_action_query" translatable="false">query</string>
+    <string name="bv_db_task_action_delete" translatable="false">delete</string>
+    <string name="bv_db_task_action_insert" translatable="false">insert</string>
 
     <!-- Menu Item Values -->
     <string name="mi_sort_popular" translatable="true">Popular</string>
     <string name="mi_sort_top_rated" translatable="true">Top Rated</string>
+    <string name="mi_favorite" translatable="true">Favorite</string>
+    <string name="mi_unfavorite" translatable="true">UnFavorite</string>
 
     <!-- Content Descriptions -->
     <string name="description_background_image" translatable="true">Moive image as backdrop.</string>

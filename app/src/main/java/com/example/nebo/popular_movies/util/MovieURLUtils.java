@@ -20,7 +20,7 @@ public class MovieURLUtils {
     private static final String POPULAR_MOVIE_ENDPOINT = "movie/popular";
     private static final String TOP_RATED_ENDPOINT = "movie/top_rated";
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p";
-    private static final String VIDEO_IMAGE_BASE_URL = "https://img.youtube.com/vi"; // /6ZfuNTqbHE8/hqdefault.jpg"
+    private static final String VIDEO_IMAGE_BASE_URL = "https://img.youtube.com/vi";
     private static final String VIDEO_IMAGE_DEFAULT_PATH = "hqdefault.jpg";
     private static final String REVIEWS_PATH = "reviews";
     private static final String VIDEOS_PATH = "videos";
@@ -38,8 +38,6 @@ public class MovieURLUtils {
     private static final String API_KEY =
             // !!! Place key below.
             "XXX";
-
-    // https://www.youtube.com/watch?v=6ZfuNTqbHE8
 
     public static Uri buildVideoUri(@NonNull final String videoKey) {
         Uri uri;
